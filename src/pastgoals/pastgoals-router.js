@@ -2,14 +2,17 @@ const express = require('express');
 const path = require('path');
 //const GoalService = require('./goals-service');
 //const { requireAuth } = require('../middleware/jwt-auth')
-const allGoals = require('./store.js');
-const goalsRouter = express.Router();
+const allPastGoals = require('./store.js');
+const pastgoalsRouter = express.Router();
 const jsonBodyParser = express.json();
+const serializePastGoals = {
 
-goalsRouter
+}
+
+pastgoalsRouter
     .route('/')
     .get((req, res, next) => {
-        res.status(200).json(allGoals);
+        res.status(200).json(allPastGoals);
     })
     .post(jsonBodyParser, (req, res, next) => {
         const {type, checkedAmt, date, goals} = req.body;
@@ -38,8 +41,8 @@ goalsRouter
             Object.assign(goal, {checked: false});
         }
         Object.assign(newGoal, {goals: goals});
-        Object.assign(newGoal, {id: allGoals.length+1});
-        allGoals.push(newGoal);
+        Object.assign(newGoal, {id: allPastGoals.length+1});
+        allPastGoals.push(newGoal);
         res.status(201).json(newGoal);
         // newReview.user_id = req.user.id;
 
@@ -55,11 +58,11 @@ goalsRouter
         //     })
         //     .catch(next);
     });
-goalsRouter
+pastgoalsRouter
     .route('/:id')
     .get((req, res, next) => {
         const { id } = req.params;
-        let goal = allGoals.find((g)=> g.id+'' === id);
+        let goal = allPastGoals.find((g)=> g.id+'' === id);
         console.log(goal, id, !!goal);
         if(!(!!goal)) {
             return res.status(404).send('Not Found')
@@ -68,11 +71,11 @@ goalsRouter
     })
     .delete((req, res) => {
         const { id } = req.params;
-        const goalIndex = allGoals.findIndex(g => g.id+'' === id);
-        if (goalIndex === -1) {
+        const pastGoalIndex = allPastGoals.findIndex(g => g.id+'' === id);
+        if (pastGoalIndex === -1) {
             return res.status(404).send('Not found');
         }
-        allGoals.splice(goalIndex, 1);
+        allPastGoals.splice(pastGoalIndex, 1);
         res.status(204).end();
     });
-module.exports = goalsRouter;
+module.exports = pastgoalsRouter;
