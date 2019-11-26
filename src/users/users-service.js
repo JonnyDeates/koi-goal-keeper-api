@@ -24,21 +24,21 @@ const UsersService = {
     serializeUser(user) {
         return {
             id: user.id,
-            user_name: xss(user.email),
-            nickname: xss(user.nick_name),
+            email: xss(user.email),
+            username: xss(user.username),
             date_created: new Date(user.date_created)
         };
     },
-    hasUserWithUserName(db, email) {
-        return db('thingful_users')
+    hasUserWithUserName(knex, email) {
+        return knex
             .where({ email })
             .first()
             .then(user => !!user);
     },
-    insertUser(db, newUser) {
-        return db
+    insertUser(knex, newUser) {
+        return knex
             .insert(newUser)
-            .into('thingful_users')
+            .into('users')
             .returning('*')
             .then(([user]) => user);
     }

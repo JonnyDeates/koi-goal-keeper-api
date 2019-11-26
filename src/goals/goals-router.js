@@ -1,20 +1,30 @@
 const express = require('express');
 const path = require('path');
-//const GoalService = require('./goals-service');
+const GoalService = require('./goals-service');
 //const { requireAuth } = require('../middleware/jwt-auth')
-const allGoals = require('./store.js');
 const goalsRouter = express.Router();
 const jsonBodyParser = express.json();
+const knex = require('knex');
 
+const knexInstance = knex({
+    client: 'pg',
+    connection: process.env.DB_URL
+});
+
+const serializeGoals = {}
 goalsRouter
     .route('/')
     .get((req, res, next) => {
-        res.status(200).json(allGoals);
+        GoalService.getAllGoals(knexInstance)
+            .then(goals => {
+                res.json(goals)
+            })
+            .catch(next)
     })
     .post(jsonBodyParser, (req, res, next) => {
-        const {type, checkedAmt, date, goals} = req.body;
-        const newGoal = {type, checkedAmt, date, goals};
-        const types = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly','5-Year'];
+        const {type, checkedamt, date, goals, userid} = req.body;
+        const newGoal = {type, checkedamt, date, goals, userid};
+        const types = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly', '5-Year'];
         for (const [key, value] of Object.entries(newGoal)) {
             if (value === undefined || null) {
                 return res.status(400).json({
@@ -22,57 +32,87 @@ goalsRouter
                 });
             }
         }
-        if(!(!!types.find((t) => t === type))){
+        if (!(!!types.find((t) => t === type))) {
             return res.status(400).json({error: `Type is not under correct Types ${types}`})
         }
-        if(goals.length === 0) {
+        if (goals.length === 0) {
             return res.status(400).json({error: 'Missing Goals in request Body'})
         }
-        for(let goal of goals){
-            if(!(!!(goal.id))) {
+        for (let goal of goals) {
+            if (!(!!(goal.id))) {
                 res.status(400).json({error: `Goal is missing an ID`})
             }
-            if(!(!!goal.goal)) {
+            if (!(!!goal.goal)) {
                 return res.status(400).json({error: `Missing info in goal :${goal.id}`})
             }
             Object.assign(goal, {checked: false});
         }
         Object.assign(newGoal, {goals: goals});
-        Object.assign(newGoal, {id: allGoals.length+1});
-        allGoals.push(newGoal);
-        res.status(201).json(newGoal);
-        // newReview.user_id = req.user.id;
-
-        // ReviewsService.insertReview(
-        //     req.app.get('db'),
-        //     newReview
-        // )
-        //     .then(review => {
-        //         res
-        //             .status(201)
-        //             .location(path.posix.join(req.originalUrl, `/${review.id}`))
-        //             .json(ReviewsService.serializeReview(review));
-        //     })
-        //     .catch(next);
+        GoalService.insertGoal(knexInstance, newGoal)
+            .then(goal => {
+                res
+                    .status(201)
+                    .location(path.posix.join(req.originalUrl, `/${goal.id}`))
+                    .json(goal)
+            })
+            .catch(next)
     });
 goalsRouter
     .route('/:id')
-    .get((req, res, next) => {
-        const { id } = req.params;
-        let goal = allGoals.find((g)=> g.id+'' === id);
-        console.log(goal, id, !!goal);
-        if(!(!!goal)) {
-            return res.status(404).send('Not Found')
-        }
-        res.status(200).json(goal);
+    .all((req, res, next) => {
+        GoalService.getById(knexInstance, req.params.id)
+            .then(goal => {
+                if (!goal) {
+                    return res.status(404).json({
+                        error: {message: `Goal doesn't exist`}
+                    })
+                }
+                res.goal = goal;
+                next()
+            })
+            .catch(next)
     })
-    .delete((req, res) => {
-        const { id } = req.params;
-        const goalIndex = allGoals.findIndex(g => g.id+'' === id);
-        if (goalIndex === -1) {
-            return res.status(404).send('Not found');
+    .get((req, res, next) => {
+        res.json(res.goal)
+    })
+    .patch(jsonBodyParser, (req, res, next) => {
+        const {type, checkedamt, date, goals, userid} = req.body;
+        const newGoal = {type, checkedamt, date, goals, userid};
+        const types = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly', '5-Year'];
+        for (const [key, value] of Object.entries(newGoal)) {
+            if (value === undefined || null) {
+                return res.status(400).json({
+                    error: `Missing '${key}' in request body`
+                });
+            }
         }
-        allGoals.splice(goalIndex, 1);
-        res.status(204).end();
+        if (!(!!types.find((t) => t === type))) {
+            return res.status(400).json({error: `Type is not under correct Types ${types}`})
+        }
+        if (goals.length === 0) {
+            return res.status(400).json({error: 'Missing Goals in request Body'})
+        }
+        for (let goal of goals) {
+            if (!(!!(goal.id))) {
+                res.status(400).json({error: `Goal is missing an ID`})
+            }
+            if (!(!!goal.goal)) {
+                return res.status(400).json({error: `Missing info in goal :${goal.id}`})
+            }
+            Object.assign(goal, {checked: false});
+        }
+        Object.assign(newGoal, {goals: goals});
+        GoalService.updateGoal(knexInstance,req.params.id,newGoal)
+            .then(() => {
+                res.status(204).end()
+            })
+            .catch(next)
+    })
+    .delete((req, res, next) => {
+        GoalService.deleteItem(knexInstance, req.params.id)
+            .then(() => {
+                res.status(204).end()
+            })
+            .catch(next)
     });
 module.exports = goalsRouter;

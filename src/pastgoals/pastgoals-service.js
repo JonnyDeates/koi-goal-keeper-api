@@ -1,60 +1,46 @@
-
-const xss = require('xss');
-
-const GoalService = {
-    getById(db, id) {
-        return db
-            .from('thingful_reviews AS rev')
-            .select(
-                'rev.id',
-                'rev.rating',
-                'rev.text',
-                'rev.date_created',
-                'rev.thing_id',
-                db.raw(
-                    `row_to_json(
-            (SELECT tmp FROM (
-              SELECT
-                usr.id,
-                usr.user_name,
-                usr.full_name,
-                usr.nickname,
-                usr.date_created,
-                usr.date_modified
-            ) tmp)
-          ) AS "user"`
-                )
-            )
-            .leftJoin(
-                'thingful_users AS usr',
-                'rev.user_id',
-                'usr.id',
-            )
-            .where('rev.id', id)
+const PastGoalService = {
+    getAllPastGoals(knex) {
+        return knex
+            .select('*')
+            .from('past_goals');
+    },
+    getById(knex, id) {
+        return knex
+            .from('past_goals')
+            .select('*')
+            .where('id', id)
             .first()
     },
-
-    insertReview(db, newReview) {
-        return db
-            .insert(newReview)
-            .into('thingful_reviews')
+    deleteItem(knex, id) {
+        return knex('past_goals')
+            .where({id})
+            .delete()
+    },
+    insertPastGoal(knex, newPastGoal) {
+        return knex
+            .insert(newPastGoal)
+            .into('past_goals')
             .returning('*')
-            .then(([review]) => review)
-            .then(review =>
-                GoalService.getById(db, review.id)
+            .then(([pg]) => pg)
+            .then(pg =>
+                PastGoalService.getById(knex, pg.id)
             )
     },
-
-    serializeReview(review) {
+    updatePastGoal(knex, id, newPastGoal) {
+        return knex('past_goals')
+            .where({id})
+            .update(newPastGoal)
+    },
+    serializeGoal(goal) {
         return {
-            id: review.id,
-            rating: review.rating,
-            text: xss(review.text),
-            thing_id: review.thing_id,
-            date_created: review.date_created,
-            user: review.user || {},
+            id: goal.id,
+            type: goal.type,
+            currentamt: goal.currentamt,
+            goals: goal.goals,
+            userid: goal.userid,
+            date: goal.date
         }
     }
-}
+};
 
-module.exports = GoalService
+module.exports = PastGoalService;
