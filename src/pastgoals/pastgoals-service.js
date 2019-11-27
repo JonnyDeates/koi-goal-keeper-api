@@ -1,14 +1,16 @@
 const PastGoalService = {
-    getAllPastGoals(knex) {
+    getAllPastGoals(knex, userid) {
         return knex
             .select('*')
+            .where('userid', userid)
             .from('past_goals');
     },
-    getById(knex, id) {
+    getById(knex, id, userid) {
         return knex
             .from('past_goals')
             .select('*')
             .where('id', id)
+            .where('userid',userid)
             .first()
     },
     deleteItem(knex, id) {

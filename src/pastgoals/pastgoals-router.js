@@ -1,28 +1,23 @@
 const express = require('express');
 const path = require('path');
 const PastGoalService = require('./pastgoals-service');
-//const { requireAuth } = require('../middleware/jwt-auth')
+const { requireAuth } = require('../middleware/jwt-auth')
 const pastgoalsRouter = express.Router();
 const jsonBodyParser = express.json();
-const knex = require('knex');
-
-const knexInstance = knex({
-    client: 'pg',
-    connection: process.env.DB_URL
-});
 const serializePastGoals = {
 
 }
 
 pastgoalsRouter
     .route('/')
+    .all(requireAuth)
     .get((req, res, next) => {
-        PastGoalService.getAllPastGoals(knexInstance)
+        PastGoalService.getAllPastGoals(req.app.get('db'),req.user.id )
             .then(goals => {
                 res.json(goals)})
             .catch(next)
     })
-    .post(jsonBodyParser, (req, res, next) => {
+    .post(requireAuth, jsonBodyParser, (req, res, next) => {
         const {type, checkedamt, date, goals, userid} = req.body;
         const newPastGoals = {type, checkedamt, date, goals, userid};
         const types = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly','5-Year'];
@@ -49,7 +44,8 @@ pastgoalsRouter
             Object.assign(goal, {checked: false});
         }
         Object.assign(newPastGoals, {goals: goals});
-        PastGoalService.insertPastGoal(knexInstance, newPastGoals)
+        Object.assign(newPastGoals, {userid: req.user.id});
+        PastGoalService.insertPastGoal(req.app.get('db'), newPastGoals)
             .then(pg => {
                 res
                     .status(201)
@@ -60,8 +56,9 @@ pastgoalsRouter
     });
 pastgoalsRouter
     .route('/:id')
+    .all(requireAuth)
     .all((req, res, next) => {
-        PastGoalService.getById(knexInstance, req.params.id)
+        PastGoalService.getById(req.app.get('db'), req.params.id, req.user.id)
             .then(pg => {
                 if (!pg) {
                     return res.status(404).json({
@@ -76,7 +73,7 @@ pastgoalsRouter
     .get((req, res, next) => {
         res.json(res.pastGoal)
     })
-    .patch(jsonBodyParser, (req, res, next) => {
+    .patch(requireAuth, jsonBodyParser, (req, res, next) => {
         const {type, checkedamt, date, goals, userid} = req.body;
         const newPastGoal = {type, checkedamt, date, goals, userid};
         const types = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly', '5-Year'];
@@ -103,14 +100,15 @@ pastgoalsRouter
             Object.assign(goal, {checked: false});
         }
         Object.assign(newPastGoal, {goals: goals});
-        PastGoalService.updatePastGoal(knexInstance,req.params.id,newPastGoal)
+
+        PastGoalService.updatePastGoal(req.app.get('db'),req.params.id,newPastGoal)
             .then(() => {
                 res.status(204).end()
             })
             .catch(next)
     })
     .delete((req, res, next) => {
-        PastGoalService.deleteItem(knexInstance, req.params.id)
+        PastGoalService.deleteItem(req.app.get('db'), req.params.id)
             .then(() => {
                 res.status(204).end()
             })

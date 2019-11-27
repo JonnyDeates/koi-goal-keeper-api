@@ -1,29 +1,24 @@
 const express = require('express');
 const path = require('path');
 const GoalService = require('./goals-service');
-//const { requireAuth } = require('../middleware/jwt-auth')
+const { requireAuth } = require('../middleware/jwt-auth');
 const goalsRouter = express.Router();
 const jsonBodyParser = express.json();
-const knex = require('knex');
 
-const knexInstance = knex({
-    client: 'pg',
-    connection: process.env.DB_URL
-});
 
 const serializeGoals = {}
 goalsRouter
     .route('/')
     .get((req, res, next) => {
-        GoalService.getAllGoals(knexInstance)
+        GoalService.getAllGoals(req.app.get('db'))
             .then(goals => {
                 res.json(goals)
             })
             .catch(next)
     })
-    .post(jsonBodyParser, (req, res, next) => {
-        const {type, checkedamt, date, goals, userid} = req.body;
-        const newGoal = {type, checkedamt, date, goals, userid};
+    .post(requireAuth, jsonBodyParser, (req, res, next) => {
+        const {type, checkedamt, date, goals} = req.body;
+        const newGoal = {type, checkedamt, date, goals};
         const types = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly', '5-Year'];
         for (const [key, value] of Object.entries(newGoal)) {
             if (value === undefined || null) {
@@ -48,7 +43,8 @@ goalsRouter
             Object.assign(goal, {checked: false});
         }
         Object.assign(newGoal, {goals: goals});
-        GoalService.insertGoal(knexInstance, newGoal)
+        Object.assign(newGoal, {userid: req.user.id});
+        GoalService.insertGoal(req.app.get('db'), newGoal)
             .then(goal => {
                 res
                     .status(201)
@@ -59,8 +55,9 @@ goalsRouter
     });
 goalsRouter
     .route('/:id')
+    .all(requireAuth)
     .all((req, res, next) => {
-        GoalService.getById(knexInstance, req.params.id)
+        GoalService.getById(req.app.get('db'), req.params.id)
             .then(goal => {
                 if (!goal) {
                     return res.status(404).json({
@@ -75,7 +72,7 @@ goalsRouter
     .get((req, res, next) => {
         res.json(res.goal)
     })
-    .patch(jsonBodyParser, (req, res, next) => {
+    .patch(requireAuth, jsonBodyParser, (req, res, next) => {
         const {type, checkedamt, date, goals, userid} = req.body;
         const newGoal = {type, checkedamt, date, goals, userid};
         const types = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly', '5-Year'];
@@ -102,14 +99,15 @@ goalsRouter
             Object.assign(goal, {checked: false});
         }
         Object.assign(newGoal, {goals: goals});
-        GoalService.updateGoal(knexInstance,req.params.id,newGoal)
+        Object.assign(newGoal, {userid: req.user.id});
+        GoalService.updateGoal(req.app.get('db'),req.params.id,newGoal)
             .then(() => {
                 res.status(204).end()
             })
             .catch(next)
     })
     .delete((req, res, next) => {
-        GoalService.deleteItem(knexInstance, req.params.id)
+        GoalService.deleteItem(req.app.get('db'), req.params.id)
             .then(() => {
                 res.status(204).end()
             })

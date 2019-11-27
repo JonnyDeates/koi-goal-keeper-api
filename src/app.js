@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const UsersRouter = require('./users/users-router');
 const GoalsRouter = require('./goals/goals-router');
 const PastGoalsRouter = require('./pastgoals/pastgoals-router');
+const authRouter = require('./middleware/auth-router');
 const app = express();
 
 const morganOption = (NODE_ENV === 'production')
@@ -19,6 +20,7 @@ app.use(cors());
 app.use('/users', UsersRouter);
 app.use('/goals', GoalsRouter);
 app.use('/pastgoals', PastGoalsRouter);
+app.use('/auth', authRouter);
 app.use(function errorHandler(error, req, res, next) {
     let response;
     if (NODE_ENV  === 'production') {
