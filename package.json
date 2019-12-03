@@ -1,25 +1,21 @@
 {
   "name": "koi-goal-keeper-api",
   "version": "1.9.0",
-  "description": "This is a boilerplate project used for starting new projects!",
+  "description": "The resource for the koi goal keepers info",
   "main": "index.js",
   "scripts": {
     "test": "mocha --require test/setup.js",
     "dev": "nodemon src/server.js",
+    "predeploy": "npm audit && npm run migrate:production",
+    "deploy": "git push heroku master",
     "migrate": "postgrator --config postgrator-config.js",
+    "migrate:production": "env SSL=true DATABASE_URL=$(heroku config:get DATABASE_URL) npm run migrate",
     "start": "node src/server.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/JonnyDeates/express-boilerplate.git"
   },
   "keywords": [],
   "author": "Jonny Deates",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/JonnyDeates/express-boilerplate/issues"
-  },
-  "homepage": "https://github.com/JonnyDeates/express-boilerplate#readme",
+  "homepage": "",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

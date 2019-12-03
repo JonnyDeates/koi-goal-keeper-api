@@ -18,9 +18,11 @@ pastgoalsRouter
             .catch(next)
     })
     .post(requireAuth, jsonBodyParser, (req, res, next) => {
-        const {type, checkedamt, date, goals, userid} = req.body;
-        const newPastGoals = {type, checkedamt, date, goals, userid};
+        const {type, checkedamt, date, goals} = req.body;
+        const newPastGoals = {type, checkedamt, date, goals};
         const types = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly','5-Year'];
+
+        console.log(newPastGoals);
         for (const [key, value] of Object.entries(newPastGoals)) {
             if (value === undefined || null) {
                 return res.status(400).json({
@@ -36,12 +38,14 @@ pastgoalsRouter
         }
         for(let goal of goals){
             if(!(!!(goal.id))) {
-                res.status(400).json({error: `Goal is missing an ID`})
+                return res.status(400).json({error: `Goal is missing an ID`})
             }
             if(!(!!goal.goal)) {
                 return res.status(400).json({error: `Missing info in goal :${goal.id}`})
             }
-            Object.assign(goal, {checked: false});
+            if(!(!!goal.checked)) {
+                Object.assign(goal, {checked: false})
+            }
         }
         Object.assign(newPastGoals, {goals: goals});
         Object.assign(newPastGoals, {userid: req.user.id});
@@ -74,8 +78,8 @@ pastgoalsRouter
         res.json(res.pastGoal)
     })
     .patch(requireAuth, jsonBodyParser, (req, res, next) => {
-        const {type, checkedamt, date, goals, userid} = req.body;
-        const newPastGoal = {type, checkedamt, date, goals, userid};
+        const {type, checkedamt, date, goals} = req.body;
+        const newPastGoal = {type, checkedamt, date, goals};
         const types = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly', '5-Year'];
         for (const [key, value] of Object.entries(newPastGoal)) {
             if (value === undefined || null) {
@@ -97,9 +101,9 @@ pastgoalsRouter
             if (!(!!goal.goal)) {
                 return res.status(400).json({error: `Missing info in goal :${goal.id}`})
             }
-            Object.assign(goal, {checked: false});
         }
         Object.assign(newPastGoal, {goals: goals});
+        Object.assign(newPastGoal, {userid: req.user.id});
 
         PastGoalService.updatePastGoal(req.app.get('db'),req.params.id,newPastGoal)
             .then(() => {
