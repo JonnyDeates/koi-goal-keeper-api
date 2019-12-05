@@ -31,13 +31,15 @@ app.use('/users', UsersRouter);
 app.use('/goals', GoalsRouter);
 app.use('/pastgoals', PastGoalsRouter);
 app.use('/auth', authRouter);
-app.use(function errorHandler(error, req, res, next) {
-   if(error){
-       console.error(error);
-       let response = {message: error.message, error}
-       res.status(500).json(response)
-   }
-});
-
+app.use(errorHandler);
+function errorHandler(error, req, res, next) {
+    const code = error.status || 500;
+    if (NODE_ENV === 'production') {
+        error.message = code === 500 ? 'internal server error' : error.message;
+    } else {
+        console.error(error);
+    }
+    res.status(code).json({ message: error.message });
+}
 
 module.exports = app;
