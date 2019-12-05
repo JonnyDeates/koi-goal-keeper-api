@@ -13,19 +13,31 @@ const app = express();
 const morganOption = (NODE_ENV === 'production')
     ? 'tiny'
     : 'common';
-const whitelist = ['https://koi-goal-keeper.now.sh'];
-const corsOptions = {
-    origin: function (origin, callback) {
-        if (whitelist.indexOf(origin) !== -1) {
-            callback(null, true)
-        } else {
-            callback(new Error('Not allowed by CORS'))
-        }
-    }
-};
+// const whitelist = ['https://koi-goal-keeper.now.sh'];
+// const corsOptions = {
+//     origin: function (origin, callback) {
+//         if (whitelist.indexOf(origin) !== -1) {
+//             callback(null, true)
+//         } else {
+//             callback(new Error('Not allowed by CORS'))
+//         }
+//     }
+// };
 
 app.use(morgan(morganOption));
-app.use(cors(corsOptions));
+const allowedOrigins = ['http://localhost:3000', 'http://my-prod-client-app-url'];
+app.use(cors({
+    origin: function(origin, callback){
+        // allow requests with no origin - like mobile apps, curl, postman
+        if(!origin) return callback(null, true);
+        if(allowedOrigins.indexOf(origin) === -1){
+            const msg = 'The CORS policy for this site does not ' +
+                'allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    }
+}));
 app.use(helmet());
 app.use('/users', UsersRouter);
 app.use('/goals', GoalsRouter);
