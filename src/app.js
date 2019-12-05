@@ -32,14 +32,11 @@ app.use('/goals', GoalsRouter);
 app.use('/pastgoals', PastGoalsRouter);
 app.use('/auth', authRouter);
 app.use(function errorHandler(error, req, res, next) {
-    let response;
-    if (NODE_ENV  === 'production') {
-        response = {error: {message: 'server error'}}
-    } else {
-        console.error(error);
-        response = {message: error.message, error}
-    }
-    res.status(500).json(response)
+   if(error){
+       console.error(error);
+       let response = {message: error.message, error}
+       res.status(500).json(response)
+   }
 });
 
 
