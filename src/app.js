@@ -22,11 +22,11 @@ const corsOptions = {
             callback(new Error('Not allowed by CORS'))
         }
     }
-}
+};
 
 app.use(morgan(morganOption));
-app.use(helmet());
 app.use(cors(corsOptions));
+app.use(helmet());
 app.use('/users', UsersRouter);
 app.use('/goals', GoalsRouter);
 app.use('/pastgoals', PastGoalsRouter);
