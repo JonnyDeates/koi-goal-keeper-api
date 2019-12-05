@@ -25,7 +25,7 @@ const morganOption = (NODE_ENV === 'production')
 // };
 
 app.use(morgan(morganOption));
-const allowedOrigins = ['http://localhost:3000', 'http://my-prod-client-app-url'];
+const allowedOrigins = ['http://localhost:3000', 'https://koi-goal-keeper.now.sh'];
 app.use(cors({
     origin: function(origin, callback){
         // allow requests with no origin - like mobile apps, curl, postman
