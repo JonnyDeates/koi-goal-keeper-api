@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { NODE_ENV } = require('./config');
+const {NODE_ENV} = require('./config');
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
@@ -25,12 +25,13 @@ const morganOption = (NODE_ENV === 'production')
 // };
 
 app.use(morgan(morganOption));
-const allowedOrigins = ['http://localhost:3000', 'https://koi-goal-keeper.now.sh'];
+const allowedOrigins = ['http://koigoalkeeper.com', 'https://koigoalkeeper.com',
+    'http://www.koigoalkeeper.com', 'https://www.koigoalkeeper.com'];
 app.use(cors({
-    origin: function(origin, callback){
+    origin: function (origin, callback) {
         // allow requests with no origin - like mobile apps, curl, postman
-        if(!origin) return callback(null, true);
-        if(allowedOrigins.indexOf(origin) === -1){
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
             const msg = 'The CORS policy for this site does not ' +
                 'allow access from the specified Origin.';
             return callback(new Error(msg), false);
@@ -44,6 +45,7 @@ app.use('/goals', GoalsRouter);
 app.use('/pastgoals', PastGoalsRouter);
 app.use('/auth', authRouter);
 app.use(errorHandler);
+
 function errorHandler(error, req, res, next) {
     const code = error.status || 500;
     if (NODE_ENV === 'production') {
@@ -51,7 +53,7 @@ function errorHandler(error, req, res, next) {
     } else {
         console.error(error);
     }
-    res.status(code).json({ message: error.message });
+    res.status(code).json({message: error.message});
 }
 
 module.exports = app;
