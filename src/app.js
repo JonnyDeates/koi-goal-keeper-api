@@ -26,7 +26,7 @@ const morganOption = (NODE_ENV === 'production')
 
 app.use(morgan(morganOption));
 const allowedOrigins = ['http://koigoalkeeper.com', 'https://koigoalkeeper.com',
-    'http://www.koigoalkeeper.com', 'https://www.koigoalkeeper.com'];
+    'http://www.koigoalkeeper.com', 'https://www.koigoalkeeper.com', 'http://localhost:3000'];
 app.use(cors({
     origin: function (origin, callback) {
         // allow requests with no origin - like mobile apps, curl, postman

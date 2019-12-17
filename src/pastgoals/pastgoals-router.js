@@ -21,8 +21,6 @@ pastgoalsRouter
         const {type, checkedamt, date, goals} = req.body;
         const newPastGoals = {type, checkedamt, date, goals};
         const types = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly','5-Year'];
-
-        console.log(newPastGoals);
         for (const [key, value] of Object.entries(newPastGoals)) {
             if (value === undefined || null) {
                 return res.status(400).json({
@@ -62,7 +60,7 @@ pastgoalsRouter
     .route('/:id')
     .all(requireAuth)
     .all((req, res, next) => {
-        PastGoalService.getById(req.app.get('db'), req.params.id, req.user.id)
+        PastGoalService.getById(req.app.get('db'), req.params.id)
             .then(pg => {
                 if (!pg) {
                     return res.status(404).json({

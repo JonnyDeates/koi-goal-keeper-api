@@ -4,6 +4,8 @@ CREATE TABLE users (
   email TEXT NOT NULL,
   password TEXT NOT NULL,
   nickname TEXT,
+  notifications BOOLEAN NOT NULL DEFAULT TRUE,
+  auto_archiver BOOLEAN NOT NULL DEFAULT TRUE,
   date_created TIMESTAMP NOT NULL DEFAULT now(),
   date_modified TIMESTAMP
 );

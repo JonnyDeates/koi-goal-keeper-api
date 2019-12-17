@@ -5,12 +5,11 @@ const PastGoalService = {
             .where('userid', userid)
             .from('past_goals');
     },
-    getById(knex, id, userid) {
+    getById(knex, id) {
         return knex
             .from('past_goals')
             .select('*')
             .where('id', id)
-            .where('userid',userid)
             .first()
     },
     deleteItem(knex, id) {

@@ -66,7 +66,8 @@ goalsRouter
                     })
                 }
                 res.goal = goal;
-                next()
+                next();
+                return null;
             })
             .catch(next)
     })
