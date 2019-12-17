@@ -83,41 +83,30 @@ usersRouter
         res.json(serializeUser(res.user))
     })
     .delete((req, res, next) => {
-        const {password} = req.body;
-
-        const passwordError = UsersService.validatePassword(password);
-        if (passwordError)
-            return res.status(400).json({error: passwordError});
-
-        AuthService.comparePasswords(password, res.user.password)
-            .then(compareMatch => {
-                if (!compareMatch)
-                    return res.status(400).json({
-                        error: 'Incorrect Password',
-                    });
-                UsersService.deleteUser(req.app.get('db'), req.params.id)
-                    .then(numRowsAffected => {
-                        res.status(204).end()
-                    })
-                    .catch(next)
+        UsersService.deleteUser(req.app.get('db'), req.params.id)
+            .then(numRowsAffected => {
+                res.status(204).end()
             })
+            .catch(next)
     })
     .patch(jsonBodyParser, (req, res, next) => {
         const {email, username, nickname, notifications, auto_archiver} = req.body;
         const userToUpdate = {email, username, nickname, notifications, auto_archiver};
-        const numberOfValues = Object.values(userToUpdate).filter(Boolean).length;
+        const numberOfValues = Object.values(userToUpdate).length;
         if (numberOfValues === 0)
             return res.status(400).json({
                 error: {
                     message: `Request body must contain either 'email', 'username', 'password' or 'nickname'`
                 }
             });
-        const newUser = {email: userToUpdate.email || res.user.email,
+        const newUser = {
+            email: userToUpdate.email || res.user.email,
             username: userToUpdate.username || res.user.username,
             nickname: userToUpdate.nickname || res.user.nickname,
             notifications: userToUpdate.notifications || res.user.notifications,
             auto_archiver: userToUpdate.auto_archiver || res.user.auto_archiver,
-            id: res.user.id, date_created: res.user.date_created, date_modified: 'now()'};
+            id: res.user.id, date_created: res.user.date_created, date_modified: 'now()'
+        };
         UsersService.updateUser(req.app.get('db'), req.params.id, serializeUser(newUser))
             .then(numRowsAffected => {
                 res.status(204).end()
