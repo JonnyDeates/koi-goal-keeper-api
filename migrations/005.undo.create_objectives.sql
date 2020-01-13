@@ -1,0 +1,4 @@
+ALTER TABLE objectives
+  DROP COLUMN IF EXISTS goalId;
+
+DROP TABLE IF EXISTS objectives;

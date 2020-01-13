@@ -18,8 +18,8 @@ goalsRouter
             .catch(next)
     })
     .post(jsonBodyParser, (req, res, next) => {
-        const {type, checkedamt, date, goals} = req.body;
-        const newGoal = {type, checkedamt, date, goals};
+        const {type, checkedamt, date} = req.body;
+        const newGoal = {type, checkedamt, date};
         const types = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly', '5-Year'];
         for (const [key, value] of Object.entries(newGoal)) {
             if (value === undefined || null) {
@@ -31,19 +31,6 @@ goalsRouter
         if (!(!!types.find((t) => t === type))) {
             return res.status(400).json({error: `Type is not under correct Types ${types}`})
         }
-        if (goals.length === 0) {
-            return res.status(400).json({error: 'Missing Goals in request Body'})
-        }
-        for (let goal of goals) {
-            if (!(!!(goal.id))) {
-                return res.status(400).json({error: `Goal is missing an ID`})
-            }
-            if (!(!!goal.goal)) {
-                return res.status(400).json({error: `Missing info in goal :${goal.id}`})
-            }
-            Object.assign(goal, {checked: false});
-        }
-        Object.assign(newGoal, {goals: goals});
         Object.assign(newGoal, {userid: req.user.id});
         GoalService.insertGoal(req.app.get('db'), newGoal)
             .then(goal => {
@@ -75,8 +62,8 @@ goalsRouter
         res.json(res.goal)
     })
     .patch(jsonBodyParser, (req, res, next) => {
-        const {type, checkedamt, date, goals} = req.body;
-        const newGoal = {type, checkedamt, date, goals};
+        const {type, checkedamt, date} = req.body;
+        const newGoal = {type, checkedamt, date};
         const types = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly', '5-Year'];
         for (const [key, value] of Object.entries(newGoal)) {
             if (value === undefined || null) {
@@ -88,18 +75,6 @@ goalsRouter
         if (!(!!types.find((t) => t === type))) {
             return res.status(400).json({error: `Type is not under correct Types ${types}`})
         }
-        if (goals.length === 0) {
-            return res.status(400).json({error: 'Missing Goals in request Body'})
-        }
-        for (let goal of goals) {
-            if (!(!!(goal.id))) {
-                return res.status(400).json({error: `Goal is missing an ID`})
-            }
-            if (!(!!goal.goal)) {
-                return res.status(400).json({error: `Missing info in goal :${goal.id}`})
-            }
-        }
-        Object.assign(newGoal, {goals: goals});
         Object.assign(newGoal, {userid: req.user.id});
         GoalService.updateGoal(req.app.get('db'),req.params.id,newGoal)
             .then(() => {

@@ -7,6 +7,8 @@ const helmet = require('helmet');
 const UsersRouter = require('./users/users-router');
 const GoalsRouter = require('./goals/goals-router');
 const PastGoalsRouter = require('./pastgoals/pastgoals-router');
+const ObjectivesRouter = require('./objectives/objectives-router');
+const PastObjectivesRouter = require('./pastobjectives/pastobjectives-router');
 const authRouter = require('./middleware/auth-router');
 const app = express();
 
@@ -42,7 +44,9 @@ app.use(cors({
 app.use(helmet());
 app.use('/users', UsersRouter);
 app.use('/goals', GoalsRouter);
-app.use('/pastgoals', PastGoalsRouter);
+app.use('/objectives', ObjectivesRouter);
+app.use('/past/objectives', PastObjectivesRouter);
+app.use('/past/goals', PastGoalsRouter);
 app.use('/auth', authRouter);
 app.use(errorHandler);
 

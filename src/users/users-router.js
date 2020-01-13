@@ -11,6 +11,9 @@ const serializeUser = user => ({
     email: xss(user.email),
     username: xss(user.username),
     date_created: user.date_created,
+    auto_archiver: user.auto_archiver,
+    notifications: user.notifications,
+    nickname: xss(user.nickname)
 });
 
 usersRouter
@@ -93,6 +96,7 @@ usersRouter
         const {email, username, nickname, notifications, auto_archiver} = req.body;
         const userToUpdate = {email, username, nickname, notifications, auto_archiver};
         const numberOfValues = Object.values(userToUpdate).length;
+        console.log(auto_archiver, numberOfValues, !(!!(userToUpdate.auto_archiver)) ?  userToUpdate.auto_archiver : res.user.auto_archiver)
         if (numberOfValues === 0)
             return res.status(400).json({
                 error: {
@@ -104,7 +108,7 @@ usersRouter
             username: userToUpdate.username || res.user.username,
             nickname: userToUpdate.nickname || res.user.nickname,
             notifications: userToUpdate.notifications || res.user.notifications,
-            auto_archiver: userToUpdate.auto_archiver || res.user.auto_archiver,
+            auto_archiver: !!(userToUpdate.auto_archiver) ?  userToUpdate.auto_archiver : res.user.auto_archiver,
             id: res.user.id, date_created: res.user.date_created, date_modified: 'now()'
         };
         UsersService.updateUser(req.app.get('db'), req.params.id, serializeUser(newUser))

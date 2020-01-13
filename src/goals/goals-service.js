@@ -31,16 +31,6 @@ const GoalService = {
         return knex('current_goals')
             .where({id})
             .update(newGoal)
-    },
-    serializeGoal(goal) {
-        return {
-            id: goal.id,
-            type: goal.type,
-            currentamt: goal.currentamt,
-            goals: goal.goals,
-            userid: goal.userid,
-            date: goal.date
-        }
     }
 };
 
