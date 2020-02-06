@@ -15,7 +15,7 @@
   "keywords": [],
   "author": "Jonny Deates",
   "license": "ISC",
-  "homepage": "",
+  "homepage": "https://github.com/JonnyDeates/koi-goal-keeper-api#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
