@@ -18,7 +18,7 @@ pastObjectivesRouter
     .route('/')
     .all(requireAuth)
     .post(jsonBodyParser, (req, res, next) => {
-        const { obj, checked ,goalid } = req.body;
+        const { obj, checked ,goalid} = req.body;
         const newObjective = {checked, obj, goalid};
         for (const [key, value] of Object.entries(newObjective)) {
             if (value === undefined || null) {

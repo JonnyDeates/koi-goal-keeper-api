@@ -18,13 +18,6 @@ const serializeUser = user => ({
 
 usersRouter
     .route('/')
-    .get((req, res, next) => {
-        UsersService.getAllUsers(req.app.get('db'))
-            .then(users => {
-                res.json(users.map(serializeUser))
-            })
-            .catch(next)
-    })
     .post(jsonBodyParser, (req, res, next) => {
         const {password, username, email, nickname} = req.body;
 

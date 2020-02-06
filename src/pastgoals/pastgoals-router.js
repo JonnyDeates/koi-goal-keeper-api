@@ -20,7 +20,7 @@ pastgoalsRouter
     .post(requireAuth, jsonBodyParser, (req, res, next) => {
         const {type, checkedamt, date} = req.body;
         const newPastGoals = {type, checkedamt, date};
-        const types = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly','5-Year'];
+        const types = ['Daily', 'Weekly','BiWeekly', 'Monthly', 'Quarterly','6-Month', 'Yearly','3-Year','5-Year','10-Year','25-Year','Distant'];
         for (const [key, value] of Object.entries(newPastGoals)) {
             if (value === undefined || null) {
                 return res.status(400).json({
@@ -63,7 +63,7 @@ pastgoalsRouter
     .patch(requireAuth, jsonBodyParser, (req, res, next) => {
         const {type, checkedamt, date} = req.body;
         const newPastGoal = {type, checkedamt, date};
-        const types = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly', '5-Year'];
+        const types = ['Daily', 'Weekly','BiWeekly', 'Monthly', 'Quarterly','6-Month', 'Yearly','3-Year','5-Year','10-Year','25-Year','Distant'];
         for (const [key, value] of Object.entries(newPastGoal)) {
             if (value === undefined || null) {
                 return res.status(400).json({
