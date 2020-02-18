@@ -89,7 +89,7 @@ usersRouter
         const {email, username, nickname, notifications, auto_archiver} = req.body;
         const userToUpdate = {email, username, nickname, notifications, auto_archiver};
         const numberOfValues = Object.values(userToUpdate).length;
-        console.log(auto_archiver, numberOfValues, !(!!(userToUpdate.auto_archiver)) ?  userToUpdate.auto_archiver : res.user.auto_archiver)
+
         if (numberOfValues === 0)
             return res.status(400).json({
                 error: {

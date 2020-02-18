@@ -15,17 +15,6 @@ const app = express();
 const morganOption = (NODE_ENV === 'production')
     ? 'tiny'
     : 'common';
-// const whitelist = ['https://koi-goal-keeper.now.sh'];
-// const corsOptions = {
-//     origin: function (origin, callback) {
-//         if (whitelist.indexOf(origin) !== -1) {
-//             callback(null, true)
-//         } else {
-//             callback(new Error('Not allowed by CORS'))
-//         }
-//     }
-// };
-
 app.use(morgan(morganOption));
 const allowedOrigins = ['http://koigoalkeeper.com', 'https://koigoalkeeper.com',
     'http://www.koigoalkeeper.com', 'https://www.koigoalkeeper.com', 'http://localhost:3000', 'http://localhost:3001'];

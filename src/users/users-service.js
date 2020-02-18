@@ -17,7 +17,7 @@ const UsersService = {
             return 'Password must not start or end with empty spaces';
         }
         if (!REGEX_UPPER_LOWER_NUMBER_SPECIAL.test(password)) {
-            return 'Password must contain 1 upper case, lower case, and number';
+            return 'Password must contain one upper case, lower case, and number';
         }
         return null;
     },
