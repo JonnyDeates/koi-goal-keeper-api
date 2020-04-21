@@ -57,7 +57,7 @@ usersRouter
                                     notifications: true,
                                     compacted: 'No'
                                 };
-                                // SettingsService.insertSettings(req.app.get('db'), defaultSettings);
+                                SettingsService.insertSettings(req.app.get('db'), defaultSettings);
                                 res
                                     .status(201)
                                     .location(path.posix.join(req.originalUrl, `/${user.id}`))
