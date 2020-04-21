@@ -1,12 +1,13 @@
 const express = require('express');
 const AuthService = require('./auth-service');
+const SettingsService = require('../settings/settings-service');
 
-const authRouter = express.Router()
-const jsonBodyParser = express.json()
+const authRouter = express.Router();
+const jsonBodyParser = express.json();
 authRouter
     .post('/login', jsonBodyParser, (req, res, next) => {
-        const { username, password } = req.body;
-        const loginUser = { username, password };
+        const {username, password} = req.body;
+        const loginUser = {username, password};
 
         for (const [key, value] of Object.entries(loginUser))
             if (value == null)
@@ -27,10 +28,17 @@ authRouter
                             return res.status(400).json({
                                 error: 'Incorrect username or password',
                             });
-
-                        const sub = dbUser.username;
-                        const payload = { userid: dbUser.id };
-                        res.send({authToken: AuthService.createJwt(sub, payload), username: dbUser.username, nickname: dbUser.nickname, email: dbUser.email, autoarchiving: dbUser.auto_archiver, notifications: dbUser.notifications, id: dbUser.id})
+                        SettingsService.getById(req.app.get('db'), dbUser.id).then((settings) => {
+                            const sub = dbUser.username;
+                            const payload = {
+                                userid: dbUser.id,
+                                username: dbUser.username,
+                                nickname: dbUser.nickname,
+                                email: dbUser.email,
+                                settings
+                            };
+                            res.send({authToken: AuthService.createJwt(sub, payload)})
+                        })
                     })
             })
             .catch(next)
