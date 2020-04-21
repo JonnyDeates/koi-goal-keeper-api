@@ -1,7 +1,5 @@
 const express = require('express');
-const path = require('path');
-const settingsRouter = require("./settings-service");
-const usersRouter = express.Router();
+const settingsRouter = express.Router();
 const jsonBodyParser = express.json();
 const xss = require('xss');
 const {requireAuth} = require('../middleware/jwt-auth');
@@ -17,32 +15,6 @@ const serializeSettings = settings => ({
     notifications: xss(settings.notifications),
     compacted: xss(settings.compacted)
 });
-
-settingsRouter
-    .route('/')
-    .post(jsonBodyParser, (req, res, next) => {
-        const {user_id} = req.body;
-        if (!user_id)
-            return res.status(400).json({
-                    error: `Missing user_id in request body`
-                });
-
-        const defaultSettings = {
-            user_id,
-            theme: 'Light Mode',
-            type_list: 'Normal List',
-            type_selected: 'All',
-            show_delete: false,
-            auto_archiving: true,
-            notifications: true,
-            compacted: 'No'
-        };
-        SettingsService.insertSettings(req.app.get('db'), defaultSettings)
-            .then(obj => {
-                res.status(201).json(obj)
-            })
-            .catch(next)
-    });
 settingsRouter
     .route('/:user_id')
     .all(requireAuth)
@@ -254,4 +226,4 @@ settingsRouter
                 res.status(204).json(res.setting)
             })
     });
-module.exports = usersRouter;
+module.exports = settingsRouter;
