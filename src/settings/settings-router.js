@@ -60,13 +60,6 @@ settingsRouter
     .get((req, res, next) => {
         res.json(serializeSettings(res.setting))
     })
-    .delete((req, res, next) => {
-        SettingsService.deleteSettings(req.app.get('db'), req.params.user_id)
-            .then(numRowsAffected => {
-                res.status(204).end()
-            })
-            .catch(next)
-    })
     .patch(jsonBodyParser, (req, res, next) => {
         const {theme, type_selected, compacted} = req.body;
         const settingUpdate = {theme, type_selected, compacted};

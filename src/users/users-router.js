@@ -86,10 +86,13 @@ usersRouter
         res.json(serializeUser(res.user))
     })
     .delete((req, res, next) => {
-        UsersService.deleteUser(req.app.get('db'), req.params.id)
-            .then(() => {
-                res.status(204).end()
-            })
+        SettingsService.deleteSettings(req.app.get('db'), res.user.id).then(()=> {
+            UsersService.deleteUser(req.app.get('db'), req.params.id)
+                .then(() => {
+
+                    res.status(204).end()
+                })
+        })
             .catch(next)
     })
     .patch(jsonBodyParser, (req, res, next) => {
