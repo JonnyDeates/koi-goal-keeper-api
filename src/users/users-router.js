@@ -48,16 +48,7 @@ usersRouter
 
                         return UsersService.insertUser(req.app.get('db'), newUser)
                             .then(user => {
-                                const defaultSettings = {
-                                    user_id: user.id,
-                                    theme: 'Light Mode',
-                                    type_list: 'Normal List',
-                                    type_selected: 'All',
-                                    show_delete: false,
-                                    notifications: true,
-                                    compacted: 'No'
-                                };
-                                SettingsService.insertSettings(req.app.get('db'), defaultSettings);
+
                                 res
                                     .status(201)
                                     .location(path.posix.join(req.originalUrl, `/${user.id}`))
