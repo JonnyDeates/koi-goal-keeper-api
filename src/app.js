@@ -4,6 +4,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
+const cacheControl = require('express-cache-controller');
 const UsersRouter = require('./users/users-router');
 const GoalsRouter = require('./goals/goals-router');
 const PastGoalsRouter = require('./pastgoals/pastgoals-router');
@@ -16,6 +17,7 @@ const app = express();
 const morganOption = (NODE_ENV === 'production')
     ? 'tiny'
     : 'common';
+app.use(cacheControl({noCache: true}));
 app.use(morgan(morganOption));
 const allowedOrigins = ['http://koigoalkeeper.com', 'https://koigoalkeeper.com', 'https://koigoalkeeperapi.herokuapp.com',
     'http://www.koigoalkeeper.com', 'https://www.koigoalkeeper.com', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:3000/register'];
