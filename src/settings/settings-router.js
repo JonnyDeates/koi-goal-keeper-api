@@ -13,6 +13,7 @@ const serializeSettings = settings => ({
     type_list: xss(settings.type_list),
     type_selected: xss(settings.type_list),
     show_delete: xss(settings.show_delete),
+    auto_archiving: xss(settings.auto_archiving),
     notifications: xss(settings.notifications),
     compacted: xss(settings.compacted)
 });
@@ -32,6 +33,7 @@ settingsRouter
             type_list: 'Normal List',
             type_selected: 'All',
             show_delete: false,
+            auto_archiving: true,
             notifications: true,
             compacted: 'No'
         };
@@ -129,6 +131,32 @@ settingsRouter
         const newSetting = {
             ...res.setting,
             notifications: !res.setting.notifications,
+        };
+        SettingsService.updateSettings(req.app.get('db'), req.params.user_id, newSetting)
+            .then(() => {
+                res.status(204).json(res.setting)
+            })
+    });
+settingsRouter
+    .route('/toggle/auto_archiving/:user_id')
+    .all(requireAuth)
+    .all((req, res, next) => {
+        SettingsService.getById(req.app.get('db'), req.params.user_id)
+            .then(setting => {
+                if (!setting) {
+                    return res.status(404).json({
+                        error: {message: `Settings doesn't exist`}
+                    })
+                }
+                res.setting = setting;
+                next()
+            })
+            .catch(next)
+    })
+    .get((req, res, next) => {
+        const newSetting = {
+            ...res.setting,
+            auto_archiving: !res.setting.auto_archiving,
         };
         SettingsService.updateSettings(req.app.get('db'), req.params.user_id, newSetting)
             .then(() => {
