@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const UsersService = require("./users-service");
+const SettingsService = require("../settings/settings-service");
 const usersRouter = express.Router();
 const jsonBodyParser = express.json();
 const xss = require('xss');
@@ -11,8 +12,6 @@ const serializeUser = user => ({
     email: xss(user.email),
     username: xss(user.username),
     date_created: user.date_created,
-    auto_archiver: user.auto_archiver,
-    notifications: user.notifications,
     nickname: xss(user.nickname)
 });
 
@@ -42,14 +41,22 @@ usersRouter
                             username,
                             password: hashedPassword,
                             email,
-                            nickname,
-                            auto_archiver: true,
-                            notifications: true,
                             date_created: 'now()',
+                            date_modified: 'now()',
                         };
 
                         return UsersService.insertUser(req.app.get('db'), newUser)
                             .then(user => {
+                                const defaultSettings = {
+                                    user_id: user.id,
+                                    theme: 'Light Mode',
+                                    type_list: 'Normal List',
+                                    type_selected: 'All',
+                                    show_delete: false,
+                                    notifications: true,
+                                    compacted: 'No'
+                                };
+                                SettingsService.insertSettings(req.app.get('db'), defaultSettings);
                                 res
                                     .status(201)
                                     .location(path.posix.join(req.originalUrl, `/${user.id}`))
@@ -80,29 +87,28 @@ usersRouter
     })
     .delete((req, res, next) => {
         UsersService.deleteUser(req.app.get('db'), req.params.id)
-            .then(numRowsAffected => {
+            .then(() => {
                 res.status(204).end()
             })
             .catch(next)
     })
     .patch(jsonBodyParser, (req, res, next) => {
-        const {email, username, nickname, notifications, auto_archiver} = req.body;
-        const userToUpdate = {email, username, nickname, notifications, auto_archiver};
+        const {email, username, nickname} = req.body;
+        const userToUpdate = {email, username, nickname};
         const numberOfValues = Object.values(userToUpdate).length;
 
         if (numberOfValues === 0)
             return res.status(400).json({
                 error: {
-                    message: `Request body must contain either 'email', 'username', 'password' or 'nickname'`
+                    message: `Request body must contain either 'email', 'username'' or 'nickname'`
                 }
             });
         const newUser = {
+            ...res.user,
             email: userToUpdate.email || res.user.email,
             username: userToUpdate.username || res.user.username,
             nickname: userToUpdate.nickname || res.user.nickname,
-            notifications: userToUpdate.notifications || res.user.notifications,
-            auto_archiver: !!(userToUpdate.auto_archiver) ?  userToUpdate.auto_archiver : res.user.auto_archiver,
-            id: res.user.id, date_created: res.user.date_created, date_modified: 'now()'
+            date_modified: 'now()'
         };
         UsersService.updateUser(req.app.get('db'), req.params.id, serializeUser(newUser))
             .then(numRowsAffected => {
@@ -160,5 +166,6 @@ usersRouter
                             })
                     })
             })
+            .catch(next)
     });
 module.exports = usersRouter;

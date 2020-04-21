@@ -10,6 +10,7 @@ const PastGoalsRouter = require('./pastgoals/pastgoals-router');
 const ObjectivesRouter = require('./objectives/objectives-router');
 const PastObjectivesRouter = require('./pastobjectives/pastobjectives-router');
 const authRouter = require('./middleware/auth-router');
+const settingsRouter = require('./settings/settings-router');
 const app = express();
 
 const morganOption = (NODE_ENV === 'production')
@@ -37,6 +38,7 @@ app.use('/objectives', ObjectivesRouter);
 app.use('/past/objectives', PastObjectivesRouter);
 app.use('/past/goals', PastGoalsRouter);
 app.use('/auth', authRouter);
+app.use('/settings', settingsRouter);
 app.use(errorHandler);
 
 function errorHandler(error, req, res, next) {
