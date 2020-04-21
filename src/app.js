@@ -17,7 +17,7 @@ const morganOption = (NODE_ENV === 'production')
     ? 'tiny'
     : 'common';
 app.use(morgan(morganOption));
-const allowedOrigins = ['http://koigoalkeeper.com', 'https://koigoalkeeper.com',
+const allowedOrigins = ['http://koigoalkeeper.com', 'https://koigoalkeeper.com', 'https://koigoalkeeperapi.herokuapp.com',
     'http://www.koigoalkeeper.com', 'https://www.koigoalkeeper.com', 'http://localhost:3000', 'http://localhost:3001'];
 app.use(cors({
     origin: function (origin, callback) {

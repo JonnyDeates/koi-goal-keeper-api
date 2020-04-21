@@ -6,6 +6,9 @@ const UsersService = {
     hashPassword(password) {
         return bcrypt.hash(password, 12);
     },
+    hashUserdata(password) {
+        return bcrypt.hash(password, 12);
+    },
     validatePassword(password) {
         if (password.length < 8) {
             return 'Password must be longer than 8 characters';

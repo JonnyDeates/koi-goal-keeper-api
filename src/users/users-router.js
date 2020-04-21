@@ -41,6 +41,7 @@ usersRouter
                             username,
                             password: hashedPassword,
                             email,
+                            nickname: nickname || '',
                             date_created: 'now()',
                             date_modified: 'now()',
                         };
