@@ -48,7 +48,7 @@ usersRouter
                         return UsersService.insertUser(req.app.get('db'), newUser)
                             .then(user => {
                                 const defaultSettings = {
-                                    user_id: user.id,
+                                    userId: user.id,
                                     theme: 'Light Mode',
                                     type_list: 'Normal List',
                                     type_selected: 'All',

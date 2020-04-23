@@ -16,3 +16,7 @@ ALTER TABLE past_goals
   ADD COLUMN
     userId INTEGER REFERENCES users(id)
     ON DELETE CASCADE;
+ALTER TABLE settings
+  ADD COLUMN
+    userId INTEGER REFERENCES users(id)
+    ON DELETE CASCADE;

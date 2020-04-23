@@ -28,15 +28,15 @@ authRouter
                             return res.status(400).json({
                                 error: 'Incorrect username or password',
                             });
-                        SettingsService.getById(req.app.get('db'), dbUser.id).then((settings) => {
+                        SettingsService.getByUserId(req.app.get('db'), dbUser.id).then((settings) => {
                             const sub = dbUser.username;
                             const payload = {
-                                userid: dbUser.id,
+                                id: dbUser.id,
                                 username: dbUser.username,
                                 nickname: dbUser.nickname,
                                 email: dbUser.email
                             };
-                            res.send({authToken: AuthService.createJwt(sub, payload), payload: {...payload, userid: '***', settings: {...settings, user_id:'***'}}})
+                            res.send({authToken: AuthService.createJwt(sub, payload), payload: {...payload, id: '***', settings: {...settings, userid:'***'}}})
                         })
                     })
             })

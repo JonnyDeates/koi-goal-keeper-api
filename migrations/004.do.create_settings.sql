@@ -1,5 +1,5 @@
 CREATE TABLE settings (
-  user_id INTEGER REFERENCES users(id),
+  id SERIAL PRIMARY KEY,
   theme TEXT NOT NULL,
   type_list TEXT NOT NULL,
   type_selected TEXT NOT NULL,

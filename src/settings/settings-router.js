@@ -6,7 +6,8 @@ const {requireAuth} = require('../middleware/jwt-auth');
 const SettingsService = require("./settings-service");
 
 const serializeSettings = settings => ({
-    user_id: settings.user_id,
+    id: settings.id,
+    userId: settings.userId,
     theme: xss(settings.theme),
     type_list: xss(settings.type_list),
     type_selected: xss(settings.type_list),
@@ -16,10 +17,10 @@ const serializeSettings = settings => ({
     compacted: xss(settings.compacted)
 });
 settingsRouter
-    .route('/:user_id')
+    .route('/:id')
     .all(requireAuth)
     .all((req, res, next) => {
-        SettingsService.getById(req.app.get('db'), req.params.user_id)
+        SettingsService.getById(req.app.get('db'), req.params.id)
             .then(setting => {
                 if (!setting) {
                     return res.status(404).json({
@@ -51,17 +52,17 @@ settingsRouter
             type_selected: settingUpdate.type_selected || res.setting.type_selected,
             compacted: settingUpdate.compacted || res.setting.compacted,
         };
-        SettingsService.updateSettings(req.app.get('db'), req.params.user_id, serializeSettings(newSetting))
+        SettingsService.updateSettings(req.app.get('db'), req.params.id, serializeSettings(newSetting))
             .then(numRowsAffected => {
                 res.status(204).end()
             })
             .catch(next)
     });
 settingsRouter
-    .route('/toggle/delete/:user_id')
+    .route('/toggle/delete/:id')
     .all(requireAuth)
     .all((req, res, next) => {
-        SettingsService.getById(req.app.get('db'), req.params.user_id)
+        SettingsService.getById(req.app.get('db'), req.params.id)
             .then(setting => {
                 if (!setting) {
                     return res.status(404).json({
@@ -78,16 +79,17 @@ settingsRouter
             ...res.setting,
             show_delete: !res.setting.show_delete,
         };
-        SettingsService.updateSettings(req.app.get('db'), req.params.user_id, newSetting)
+        SettingsService.updateSettings(req.app.get('db'), req.params.id, newSetting)
             .then(() => {
                 res.status(204).json(res.setting)
             })
+
     });
 settingsRouter
-    .route('/toggle/notifications/:user_id')
+    .route('/toggle/notifications/:id')
     .all(requireAuth)
     .all((req, res, next) => {
-        SettingsService.getById(req.app.get('db'), req.params.user_id)
+        SettingsService.getById(req.app.get('db'), req.params.id)
             .then(setting => {
                 if (!setting) {
                     return res.status(404).json({
@@ -104,16 +106,16 @@ settingsRouter
             ...res.setting,
             notifications: !res.setting.notifications,
         };
-        SettingsService.updateSettings(req.app.get('db'), req.params.user_id, newSetting)
+        SettingsService.updateSettings(req.app.get('db'), req.params.id, newSetting)
             .then(() => {
                 res.status(204).json(res.setting)
             })
     });
 settingsRouter
-    .route('/toggle/auto_archiving/:user_id')
+    .route('/toggle/auto_archiving/:id')
     .all(requireAuth)
     .all((req, res, next) => {
-        SettingsService.getById(req.app.get('db'), req.params.user_id)
+        SettingsService.getById(req.app.get('db'), req.params.id)
             .then(setting => {
                 if (!setting) {
                     return res.status(404).json({
@@ -130,13 +132,13 @@ settingsRouter
             ...res.setting,
             auto_archiving: !res.setting.auto_archiving,
         };
-        SettingsService.updateSettings(req.app.get('db'), req.params.user_id, newSetting)
+        SettingsService.updateSettings(req.app.get('db'), req.params.id, newSetting)
             .then(() => {
                 res.status(204).json(res.setting)
             })
     });
 settingsRouter
-    .route('/toggle/compacted/:user_id')
+    .route('/toggle/compacted/:id')
     .all(requireAuth)
     .all((req, res, next) => {
         SettingsService.getById(req.app.get('db'), req.params.user_id)
@@ -180,10 +182,10 @@ settingsRouter
             })
     });
 settingsRouter
-    .route('/toggle/type_list/:user_id')
+    .route('/toggle/type_list/:id')
     .all(requireAuth)
     .all((req, res, next) => {
-        SettingsService.getById(req.app.get('db'), req.params.user_id)
+        SettingsService.getById(req.app.get('db'), req.params.id)
             .then(setting => {
                 if (!setting) {
                     return res.status(404).json({
@@ -221,7 +223,7 @@ settingsRouter
             ...res.setting,
             type_list: newType,
         };
-        SettingsService.updateSettings(req.app.get('db'), req.params.user_id, newSetting)
+        SettingsService.updateSettings(req.app.get('db'), req.params.id, newSetting)
             .then(() => {
                 res.status(204).json(res.setting)
             })

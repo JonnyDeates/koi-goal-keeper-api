@@ -1,6 +1,6 @@
 {
   "name": "koi-goal-keeper-api",
-  "version": "2.5.1",
+  "version": "2.7.5",
   "description": "The resource for the koi goal keepers info",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,7 @@
   "keywords": [],
   "author": "Jonny Deates",
   "license": "ISC",
-  "homepage": "",
+  "homepage": "https://github.com/JonnyDeates/koi-goal-keeper-api#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
