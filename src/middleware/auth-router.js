@@ -36,7 +36,7 @@ authRouter
                                 nickname: dbUser.nickname,
                                 email: dbUser.email
                             };
-                            res.send({authToken: AuthService.createJwt(sub, payload), payload: {...payload, userid: '***', settings}})
+                            res.send({authToken: AuthService.createJwt(sub, payload), payload: {...payload, userid: '***', settings: {...settings, user_id:'***'}}})
                         })
                     })
             })
