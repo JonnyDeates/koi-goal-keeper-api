@@ -29,7 +29,6 @@ usersRouter
 
         if (passwordError)
             return res.status(400).json({error: passwordError});
-
         UsersService.hasUserWithUserName(req.app.get('db'), username)
             .then(hasUserWithUserName => {
                 if (hasUserWithUserName)
@@ -41,7 +40,7 @@ usersRouter
                             username,
                             password: hashedPassword,
                             email,
-                            nickname: nickname || '',
+                            nickname,
                             date_created: 'now()',
                             date_modified: 'now()',
                         };
@@ -53,6 +52,7 @@ usersRouter
                                     theme: 'Light Mode',
                                     type_list: 'Normal List',
                                     type_selected: 'All',
+                                    auto_archiving: false,
                                     show_delete: false,
                                     notifications: true,
                                     compacted: 'No'
