@@ -22,6 +22,8 @@ const SettingsService = {
         return knex
             .insert(newSettings)
             .into('settings')
+            .returning('*')
+            .then(([settings]) => settings);
     },
     updateSettings(knex, id, newSettings) {
         return knex('settings')

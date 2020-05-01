@@ -48,7 +48,7 @@ usersRouter
                         return UsersService.insertUser(req.app.get('db'), newUser)
                             .then(user => {
                                 const defaultSettings = {
-                                    userId: user.id,
+                                    userid: user.id,
                                     theme: 'Light Mode',
                                     type_list: 'Normal List',
                                     type_selected: 'All',
@@ -71,17 +71,18 @@ usersRouter
     .route('/:id')
     .all(requireAuth)
     .all((req, res, next) => {
-        UsersService.getById(req.app.get('db'), req.params.id)
-            .then(user => {
-                if (!user) {
-                    return res.status(404).json({
-                        error: {message: `User doesn't exist`}
-                    })
-                }
-                res.user = user;
-                next()
-            })
-            .catch(next)
+        console.log(res.user, req.user)
+        // UsersService.getById(req.app.get('db'), req.params.id)
+        //     .then(user => {
+        //         if (!user) {
+        //             return res.status(404).json({
+        //                 error: {message: `User doesn't exist`}
+        //             })
+        //         }
+        //         res.user = user;
+        //         next()
+        //     })
+        //     .catch(next)
     })
     .get((req, res, next) => {
         res.json(serializeUser(res.user))

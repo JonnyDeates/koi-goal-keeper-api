@@ -1,7 +1,7 @@
 CREATE TYPE goal_type AS ENUM (
     'Daily',
     'Weekly',
-    'BiWeekly'
+    'BiWeekly',
     'Monthly',
     'Quarterly',
     '6-Month',

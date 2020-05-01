@@ -7,13 +7,13 @@ const SettingsService = require("./settings-service");
 
 const serializeSettings = settings => ({
     id: settings.id,
-    userId: settings.userId,
+    userid: settings.userid,
     theme: xss(settings.theme),
     type_list: xss(settings.type_list),
-    type_selected: xss(settings.type_list),
-    show_delete: xss(settings.show_delete),
-    auto_archiving: xss(settings.auto_archiving),
-    notifications: xss(settings.notifications),
+    type_selected: xss(settings.type_selected),
+    show_delete: settings.show_delete,
+    auto_archiving: settings.auto_archiving,
+    notifications: settings.notifications,
     compacted: xss(settings.compacted)
 });
 settingsRouter
@@ -36,8 +36,8 @@ settingsRouter
         res.json(serializeSettings(res.setting))
     })
     .patch(jsonBodyParser, (req, res, next) => {
-        const {theme, type_selected, compacted} = req.body;
-        const settingUpdate = {theme, type_selected, compacted};
+        const {theme, type_selected} = req.body;
+        const settingUpdate = {theme, type_selected};
         const numberOfValues = Object.values(settingUpdate).length;
 
         if (numberOfValues === 0)
@@ -49,8 +49,7 @@ settingsRouter
         const newSetting = {
             ...res.setting,
             theme: settingUpdate.theme || res.setting.theme,
-            type_selected: settingUpdate.type_selected || res.setting.type_selected,
-            compacted: settingUpdate.compacted || res.setting.compacted,
+            type_selected: settingUpdate.type_selected || res.setting.type_selected
         };
         SettingsService.updateSettings(req.app.get('db'), req.params.id, serializeSettings(newSetting))
             .then(numRowsAffected => {
@@ -141,7 +140,7 @@ settingsRouter
     .route('/toggle/compacted/:id')
     .all(requireAuth)
     .all((req, res, next) => {
-        SettingsService.getById(req.app.get('db'), req.params.user_id)
+        SettingsService.getById(req.app.get('db'), req.params.id)
             .then(setting => {
                 if (!setting) {
                     return res.status(404).json({
@@ -176,7 +175,7 @@ settingsRouter
             ...res.setting,
             compacted: newCompacted,
         };
-        SettingsService.updateSettings(req.app.get('db'), req.params.user_id, newSetting)
+        SettingsService.updateSettings(req.app.get('db'), req.params.id, newSetting)
             .then(() => {
                 res.status(204).json(res.setting)
             })
