@@ -71,18 +71,17 @@ usersRouter
     .route('/:id')
     .all(requireAuth)
     .all((req, res, next) => {
-        console.log(res.user, req.user)
-        // UsersService.getById(req.app.get('db'), req.params.id)
-        //     .then(user => {
-        //         if (!user) {
-        //             return res.status(404).json({
-        //                 error: {message: `User doesn't exist`}
-        //             })
-        //         }
-        //         res.user = user;
-        //         next()
-        //     })
-        //     .catch(next)
+        UsersService.getById(req.app.get('db'), req.params.id)
+            .then(user => {
+                if (!user) {
+                    return res.status(404).json({
+                        error: {message: `User doesn't exist`}
+                    })
+                }
+                res.user = user;
+                next()
+            })
+            .catch(next)
     })
     .get((req, res, next) => {
         res.json(serializeUser(res.user))
