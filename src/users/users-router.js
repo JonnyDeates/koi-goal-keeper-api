@@ -9,37 +9,40 @@ const {requireAuth} = require('../middleware/jwt-auth');
 const AuthService = require("../middleware/auth-service");
 const serializeUser = user => ({
     id: user.id,
-    email: xss(user.email),
     username: xss(user.username),
     date_created: user.date_created,
     nickname: xss(user.nickname)
 });
-
+const validateEmail = (email) => {
+    const re = /^(?:[a-z0-9!#$%&amp;'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&amp;'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/;
+    return re.test(email);
+}
 usersRouter
     .route('/')
     .post(jsonBodyParser, (req, res, next) => {
-        const {password, username, email, nickname} = req.body;
+        const {password, username, nickname} = req.body;
 
-        for (const field of ['email', 'username', 'password', 'nickname'])
+        for (const field of ['username', 'password', 'nickname'])
             if (!req.body[field])
                 return res.status(400).json({
                     error: `Missing '${field}' in request body`
                 });
-        const passwordError = UsersService.validatePassword(password);
+        if(!validateEmail(username))
+            return res.status(400).json({error: `Email not formatted correctly`});
 
+        const passwordError = UsersService.validatePassword(password);
         if (passwordError)
             return res.status(400).json({error: passwordError});
         UsersService.hasUserWithUserName(req.app.get('db'), username)
             .then(hasUserWithUserName => {
                 if (hasUserWithUserName)
-                    return res.status(400).json({error: `Username already taken`});
+                    return res.status(400).json({error: `Email already taken`});
 
                 return UsersService.hashPassword(password)
                     .then(hashedPassword => {
                         const newUser = {
                             username,
                             password: hashedPassword,
-                            email,
                             nickname,
                             date_created: 'now()',
                             date_modified: 'now()',
@@ -97,23 +100,25 @@ usersRouter
             .catch(next)
     })
     .patch(jsonBodyParser, (req, res, next) => {
-        const {email, username, nickname} = req.body;
-        const userToUpdate = {email, username, nickname};
+        const {username, nickname} = req.body;
+        const userToUpdate = {username, nickname};
         const numberOfValues = Object.values(userToUpdate).length;
 
         if (numberOfValues === 0)
             return res.status(400).json({
                 error: {
-                    message: `Request body must contain either 'email', 'username'' or 'nickname'`
+                    message: `Request body must contain either 'username'' or 'nickname'`
                 }
             });
         const newUser = {
             ...res.user,
-            email: userToUpdate.email || res.user.email,
             username: userToUpdate.username || res.user.username,
             nickname: userToUpdate.nickname || res.user.nickname,
             date_modified: 'now()'
         };
+        if(!validateEmail(newUser.username))
+            return res.status(400).json({error: `Email not formatted correctly already taken`});
+
         UsersService.updateUser(req.app.get('db'), req.params.id, serializeUser(newUser))
             .then(numRowsAffected => {
                 res.status(204).end()

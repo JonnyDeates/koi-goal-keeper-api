@@ -1,13 +1,19 @@
 const express = require('express');
 const AuthService = require('./auth-service');
+const UsersService = require("../users/users-service");
 const SettingsService = require('../settings/settings-service');
 
 const authRouter = express.Router();
 const jsonBodyParser = express.json();
+const validateEmail = (email) => {
+    const re = /^(?:[a-z0-9!#$%&amp;'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&amp;'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/;
+    return re.test(email);
+}
+
 authRouter
     .post('/login', jsonBodyParser, (req, res, next) => {
         const {username, password} = req.body;
-        const loginUser = {username, password};
+        const loginUser = {username: username.toLowerCase(), password};
 
         for (const [key, value] of Object.entries(loginUser))
             if (value == null)
@@ -36,8 +42,57 @@ authRouter
                                 nickname: dbUser.nickname,
                                 email: dbUser.email
                             };
-                            res.send({authToken: AuthService.createJwt(sub, payload), payload: {payload, settings: {...settings, userid:'***'}}})
+                            res.send({
+                                authToken: AuthService.createJwt(sub, payload),
+                                payload: {payload, settings: {...settings, userid: '***'}}
+                            })
                         })
+                    })
+            })
+            .catch(next)
+    })
+    .post('/google/login', jsonBodyParser, (req, res, next) => {
+        const {token, username, nickname} = req.body;
+        console.log(token, username, nickname)
+        for (const field of ['username', 'token', 'nickname'])
+            if (!req.body[field])
+                return res.status(400).json({
+                    error: `Missing '${field}' in request body`
+                });
+        if (!validateEmail(username))
+            return res.status(400).json({error: `Email not formatted correctly`});
+        UsersService.hasUserWithUserName(req.app.get('db'), username)
+            .then(hasUserWithUserName => {
+                if (hasUserWithUserName)
+                    return res.status(400).json({error: `Email already taken`});
+
+                return UsersService.hashPassword(token)
+                    .then(hashedPassword => {
+                        const newUser = {
+                            username,
+                            password: hashedPassword,
+                            nickname,
+                            date_created: 'now()',
+                            date_modified: 'now()',
+                        };
+
+                        return UsersService.insertUser(req.app.get('db'), newUser)
+                            .then(user => {
+                                const defaultSettings = {
+                                    userid: user.id,
+                                    theme: 'Light Mode',
+                                    type_list: 'Normal List',
+                                    type_selected: 'All',
+                                    auto_archiving: false,
+                                    show_delete: false,
+                                    notifications: true,
+                                    compacted: 'No'
+                                };
+                                SettingsService.insertSettings(req.app.get('db'), defaultSettings);
+                                res
+                                    .status(201)
+                                    .json(UsersService.serializeUser(user))
+                            })
                     })
             })
             .catch(next)
