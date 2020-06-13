@@ -102,7 +102,7 @@ authRouter
                             username,
                             password: hashedPassword,
                             nickname,
-                            Token: 'google',
+                            token: 'google',
                             date_created: 'now()',
                             date_modified: 'now()',
                         };
