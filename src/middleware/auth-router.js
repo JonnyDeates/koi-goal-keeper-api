@@ -12,9 +12,9 @@ const validateEmail = (email) => {
 const encrypt = (string) => {
     let x = 0;
     for(let i = 0; i< string.length; i++){
-        x = x + string.charCodeAt(i);
+        x = x + string[i];
     }
-    return x*7008041*7007177*7005451*7004237;
+    return x+7008041+(7007177*7005451*7004237);
 };
 authRouter
     .post('/login', jsonBodyParser, (req, res, next) => {
