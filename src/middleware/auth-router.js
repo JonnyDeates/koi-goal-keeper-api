@@ -117,7 +117,11 @@ authRouter
                                     auto_archiving: false,
                                     show_delete: false,
                                     notifications: true,
-                                    compacted: 'No'
+                                    compacted: 'No',
+                                    paid_account: false,
+                                    local_storage: true,
+                                    dark_mode: false,
+                                    color_style: 'standard'
                                 };
                                 SettingsService.insertSettings(req.app.get('db'), defaultSettings);
                                 res

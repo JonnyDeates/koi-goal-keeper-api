@@ -13,7 +13,11 @@ const serializeSettings = settings => ({
     type_selected: xss(settings.type_selected),
     show_delete: settings.show_delete,
     auto_archiving: settings.auto_archiving,
+    dark_mode: settings.dark_mode,
+    local_storage: settings.local_storage,
     notifications: settings.notifications,
+    paid_account: settings.paid_account,
+    color_style: settings.color_style,
     compacted: xss(settings.compacted)
 });
 settingsRouter
@@ -36,18 +40,19 @@ settingsRouter
         res.json(serializeSettings(res.setting))
     })
     .patch(jsonBodyParser, (req, res, next) => {
-        const {theme, type_selected} = req.body;
-        const settingUpdate = {theme, type_selected};
+        const {theme, type_selected, color_style} = req.body;
+        const settingUpdate = {theme, type_selected, color_style};
         const numberOfValues = Object.values(settingUpdate).length;
 
         if (numberOfValues === 0)
             return res.status(400).json({
                 error: {
-                    message: `Request body must contain either 'theme', 'type_list', or 'compacted'`
+                    message: `Request body must contain either 'theme', 'type_selected', or 'color_style'`
                 }
             });
         const newSetting = {
             ...res.setting,
+            color_style: settingUpdate.color_style || res.setting.color_style,
             theme: settingUpdate.theme || res.setting.theme,
             type_selected: settingUpdate.type_selected || res.setting.type_selected
         };
@@ -57,6 +62,50 @@ settingsRouter
             })
             .catch(next)
     });
+settingsRouter
+    .route('/all/:id')
+    .all(requireAuth)
+    .all((req, res, next) => {
+        SettingsService.getById(req.app.get('db'), req.params.id)
+            .then(setting => {
+                if (!setting) {
+                    return res.status(404).json({
+                        error: {message: `Settings doesn't exist`}
+                    })
+                }
+                res.setting = setting;
+                next()
+            })
+            .catch(next)
+    })    .patch(jsonBodyParser, (req, res, next) => {
+    const {type_list, theme, type_selected, color_style, show_delete, notifications, auto_archiving, dark_mode, local_storage, compacted} = req.body;
+    const settingUpdate = {type_list, theme, type_selected, color_style, show_delete, notifications, auto_archiving, dark_mode, local_storage, compacted};
+    const numberOfValues = Object.values(settingUpdate).length;
+
+    if (numberOfValues === 0)
+        return res.status(400).json({
+            error: {
+                message: `Request body must contain an entire settings object.`
+            }
+        });
+    const newSetting = {
+        ...res.setting,
+        show_delete: typeof settingUpdate === 'boolean' ?  settingUpdate.show_delete : res.setting.show_delete,
+        notifications: typeof settingUpdate === 'boolean' ?  settingUpdate.notifications : res.setting.notifications,
+        auto_archiving: typeof settingUpdate === 'boolean' ?  settingUpdate.auto_archiving : res.setting.auto_archiving,
+        dark_mode: typeof settingUpdate === 'boolean' ?  settingUpdate.dark_mode : res.setting.dark_mode,
+        type_list: settingUpdate.type_list || res.setting.type_list,
+        color_style: settingUpdate.color_style || res.setting.color_style,
+        theme: settingUpdate.theme || res.setting.theme,
+        type_selected: settingUpdate.type_selected || res.setting.type_selected,
+        compacted: settingUpdate.compacted || res.setting.compacted
+    };
+    SettingsService.updateSettings(req.app.get('db'), req.params.id, serializeSettings(newSetting))
+        .then(numRowsAffected => {
+            res.status(204).end()
+        })
+        .catch(next)
+});
 settingsRouter
     .route('/toggle/delete/:id')
     .all(requireAuth)
@@ -174,6 +223,84 @@ settingsRouter
         const newSetting = {
             ...res.setting,
             compacted: newCompacted,
+        };
+        SettingsService.updateSettings(req.app.get('db'), req.params.id, newSetting)
+            .then(() => {
+                res.status(204).json(res.setting)
+            })
+    });
+settingsRouter
+    .route('/toggle/dark_mode/:id')
+    .all(requireAuth)
+    .all((req, res, next) => {
+        SettingsService.getById(req.app.get('db'), req.params.id)
+            .then(setting => {
+                if (!setting) {
+                    return res.status(404).json({
+                        error: {message: `Settings doesn't exist`}
+                    })
+                }
+                res.setting = setting;
+                next()
+            })
+            .catch(next)
+    })
+    .get((req, res, next) => {
+        const newSetting = {
+            ...res.setting,
+            dark_mode: !res.setting.dark_mode,
+        };
+        SettingsService.updateSettings(req.app.get('db'), req.params.id, newSetting)
+            .then(() => {
+                res.status(204).json(res.setting)
+            })
+    });
+settingsRouter
+    .route('/toggle/local_storage/:id')
+    .all(requireAuth)
+    .all((req, res, next) => {
+        SettingsService.getById(req.app.get('db'), req.params.id)
+            .then(setting => {
+                if (!setting) {
+                    return res.status(404).json({
+                        error: {message: `Settings doesn't exist`}
+                    })
+                }
+                res.setting = setting;
+                next()
+            })
+            .catch(next)
+    })
+    .get((req, res, next) => {
+        const newSetting = {
+            ...res.setting,
+            local_storage: !res.setting.local_storage,
+        };
+        SettingsService.updateSettings(req.app.get('db'), req.params.id, newSetting)
+            .then(() => {
+                res.status(204).json(res.setting)
+            })
+    });
+settingsRouter
+    .route('/toggle/paid_account/:id')
+    .all(requireAuth)
+    .all((req, res, next) => {
+        SettingsService.getById(req.app.get('db'), req.params.id)
+            .then(setting => {
+                if (!setting) {
+                    return res.status(404).json({
+                        error: {message: `Settings doesn't exist`}
+                    })
+                }
+                res.setting = setting;
+                next()
+            })
+            .catch(next)
+    })
+    .get((req, res, next) => {
+        const newSetting = {
+            ...res.setting,
+            paid_account: !res.setting.paid_account,
         };
         SettingsService.updateSettings(req.app.get('db'), req.params.id, newSetting)
             .then(() => {

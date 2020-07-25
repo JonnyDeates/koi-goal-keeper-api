@@ -17,6 +17,11 @@ const GoalService = {
             .where({id})
             .delete()
     },
+    deleteAllGoals(knex, userid){
+        return knex('current_goals')
+            .where({userid})
+            .delete()
+    },
     insertGoal(knex, newGoal) {
         return knex
             .insert(newGoal)

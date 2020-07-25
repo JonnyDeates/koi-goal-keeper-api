@@ -40,7 +40,8 @@ goalsRouter
                     .json(goal)
             })
             .catch(next)
-    });
+    })
+
 goalsRouter
     .route('/:id')
     .all(requireAuth)
