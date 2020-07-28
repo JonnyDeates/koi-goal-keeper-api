@@ -9,7 +9,7 @@
     "predeploy": "npm audit && npm run migrate:production",
     "deploy": "git push heroku master",
     "migrate": "postgrator --config postgrator-config.js",
-    "migrate:test": "DATABASE_URL=postgresql://dunder_mifflin@localhost/koigoalkeeper-test npm run migrate",
+    "migrate:test": "DATABASE_URL=postgresql://postgres:CheggSpy@localhost/koigoalkeeper-test npm run migrate",
     "migrate:production": "env SSL=true DATABASE_URL=$(heroku config:get DATABASE_URL) npm run migrate",
     "start": "node src/server.js"
   },
@@ -20,21 +20,22 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.2",
     "cuid": "^2.1.6",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-cache-controller": "^1.1.0",
-    "helmet": "^3.21.2",
+    "helmet": "^3.23.3",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.20.2",
     "morgan": "^1.9.1",
     "pg": "^7.14.0",
-    "xss": "^1.0.6"
+    "xss": "^1.0.8"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^6.2.2",
-    "nodemon": "^2.0.3",
+    "nodemon": "^2.0.4",
     "postgrator-cli": "^3.3.0",
     "supertest": "^4.0.2"
   },
