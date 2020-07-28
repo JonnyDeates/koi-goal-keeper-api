@@ -77,35 +77,47 @@ settingsRouter
                 next()
             })
             .catch(next)
-    })    .patch(jsonBodyParser, (req, res, next) => {
-    const {type_list, theme, type_selected, color_style, show_delete, notifications, auto_archiving, dark_mode, local_storage, compacted} = req.body;
-    const settingUpdate = {type_list, theme, type_selected, color_style, show_delete, notifications, auto_archiving, dark_mode, local_storage, compacted};
-    const numberOfValues = Object.values(settingUpdate).length;
+    })
+    .patch(jsonBodyParser, (req, res, next) => {
+        const {type_list, theme, type_selected, color_style, show_delete, notifications, auto_archiving, dark_mode, local_storage, compacted} = req.body;
+        const settingUpdate = {
+            type_list,
+            theme,
+            type_selected,
+            color_style,
+            show_delete,
+            notifications,
+            auto_archiving,
+            dark_mode,
+            local_storage,
+            compacted
+        };
+        const numberOfValues = Object.values(settingUpdate).length;
 
-    if (numberOfValues === 0)
-        return res.status(400).json({
-            error: {
-                message: `Request body must contain an entire settings object.`
-            }
-        });
-    const newSetting = {
-        ...res.setting,
-        show_delete: typeof settingUpdate === 'boolean' ?  settingUpdate.show_delete : res.setting.show_delete,
-        notifications: typeof settingUpdate === 'boolean' ?  settingUpdate.notifications : res.setting.notifications,
-        auto_archiving: typeof settingUpdate === 'boolean' ?  settingUpdate.auto_archiving : res.setting.auto_archiving,
-        dark_mode: typeof settingUpdate === 'boolean' ?  settingUpdate.dark_mode : res.setting.dark_mode,
-        type_list: settingUpdate.type_list || res.setting.type_list,
-        color_style: settingUpdate.color_style || res.setting.color_style,
-        theme: settingUpdate.theme || res.setting.theme,
-        type_selected: settingUpdate.type_selected || res.setting.type_selected,
-        compacted: settingUpdate.compacted || res.setting.compacted
-    };
-    SettingsService.updateSettings(req.app.get('db'), req.params.id, serializeSettings(newSetting))
-        .then(numRowsAffected => {
-            res.status(204).end()
-        })
-        .catch(next)
-});
+        if (numberOfValues === 0)
+            return res.status(400).json({
+                error: {
+                    message: `Request body must contain an entire settings object.`
+                }
+            });
+        const newSetting = {
+            ...res.setting,
+            show_delete: typeof settingUpdate === 'boolean' ? settingUpdate.show_delete : res.setting.show_delete,
+            notifications: typeof settingUpdate === 'boolean' ? settingUpdate.notifications : res.setting.notifications,
+            auto_archiving: typeof settingUpdate === 'boolean' ? settingUpdate.auto_archiving : res.setting.auto_archiving,
+            dark_mode: typeof settingUpdate === 'boolean' ? settingUpdate.dark_mode : res.setting.dark_mode,
+            type_list: settingUpdate.type_list || res.setting.type_list,
+            color_style: settingUpdate.color_style || res.setting.color_style,
+            theme: settingUpdate.theme || res.setting.theme,
+            type_selected: settingUpdate.type_selected || res.setting.type_selected,
+            compacted: settingUpdate.compacted || res.setting.compacted
+        };
+        SettingsService.updateSettings(req.app.get('db'), req.params.id, serializeSettings(newSetting))
+            .then(numRowsAffected => {
+                res.status(204).end()
+            })
+            .catch(next)
+    });
 settingsRouter
     .route('/toggle/delete/:id')
     .all(requireAuth)

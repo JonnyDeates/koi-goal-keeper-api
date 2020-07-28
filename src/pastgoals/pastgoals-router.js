@@ -40,7 +40,14 @@ pastgoalsRouter
                     .json(pg)
             })
             .catch(next)
-    });
+    })
+    .delete((req, res, next) => {
+    PastGoalService.deleteAllPastGoals(req.app.get('db'), req.user.id)
+        .then(() => {
+            res.status(204)
+        })
+        .catch(next)
+});
 pastgoalsRouter
     .route('/:id')
     .all(requireAuth)

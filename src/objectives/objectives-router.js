@@ -18,8 +18,8 @@ objectivesRouter
     .route('/')
     .all(requireAuth)
     .post(jsonBodyParser, (req, res, next) => {
-        const { obj, goalid } = req.body;
-        const newObjective = {checked: false, obj, goalid};
+        const { obj, goalid, checked } = req.body;
+        const newObjective = {checked: typeof checked === "boolean" ? checked : false, obj, goalid};
         for (const [key, value] of Object.entries(newObjective)) {
             if (value === undefined || null) {
                 return res.status(400).json({

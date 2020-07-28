@@ -82,7 +82,6 @@ authRouter
     })
     .post('/google/login', jsonBodyParser, (req, res, next) => {
         const {token, username, nickname} = req.body;
-        console.log(token, username, nickname)
         for (const field of ['username', 'token', 'nickname'])
             if (!req.body[field])
                 return res.status(400).json({
@@ -111,7 +110,7 @@ authRouter
                             .then(user => {
                                 const defaultSettings = {
                                     userid: user.id,
-                                    theme: 'Light Mode',
+                                    theme: 'Default',
                                     type_list: 'Normal List',
                                     type_selected: 'All',
                                     auto_archiving: false,

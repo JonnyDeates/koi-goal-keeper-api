@@ -17,6 +17,11 @@ const PastGoalService = {
             .where({id})
             .delete()
     },
+    deleteAllPastGoals(knex, userid){
+        return knex('past_goals')
+            .where({userid})
+            .delete()
+    },
     insertPastGoal(knex, newPastGoal) {
         return knex
             .insert(newPastGoal)

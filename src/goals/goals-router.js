@@ -5,8 +5,6 @@ const { requireAuth } = require('../middleware/jwt-auth');
 const goalsRouter = express.Router();
 const jsonBodyParser = express.json();
 
-
-const serializeGoals = {}
 goalsRouter
     .route('/')
     .all(requireAuth)
@@ -41,6 +39,13 @@ goalsRouter
             })
             .catch(next)
     })
+    .delete((req, res, next) => {
+    GoalService.deleteAllGoals(req.app.get('db'), req.user.id)
+        .then(() => {
+            res.status(204)
+        })
+        .catch(next)
+});
 
 goalsRouter
     .route('/:id')
