@@ -12,6 +12,12 @@ const ObjectivesService = {
             .where('id', id)
             .first()
     },
+    countObjectives(knex, id) {
+        return knex
+            .from('objectives')
+            .count('*')
+            .where('id', id)
+    },
     deleteObjective(knex, id) {
         return knex('objectives')
             .where({id})
