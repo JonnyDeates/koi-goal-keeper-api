@@ -17,7 +17,7 @@ function requireAuth(req, res, next) {
             .then(user => {
                 if (!user)
                     return res.status(401).json({ error: 'Unauthorized request' });
-
+                SettingsService.getById(req.app.get('db'), )
                 req.user = user;
                 next();
                 return null;

@@ -20,6 +20,8 @@ objectivesRouter
     .post(jsonBodyParser, (req, res, next) => {
         const { obj, goalid, checked } = req.body;
         const newObjective = {checked: typeof checked === "boolean" ? checked : false, obj, goalid};
+        let count = 0;
+            ObjectivesService.countObjectives(req.app.get('db')).then(Count=>  count = parseInt(Count[0].count));
         for (const [key, value] of Object.entries(newObjective)) {
             if (value === undefined || null) {
                 return res.status(400).json({
@@ -27,6 +29,12 @@ objectivesRouter
                 });
             }
         }
+
+       if(count > 50){
+           return res.status(402).json({
+               error: `Hit cap on Objectives`
+           });
+       }
         ObjectivesService.insertObjective(req.app.get('db'), newObjective)
             .then(obj => {
                 res
@@ -35,7 +43,7 @@ objectivesRouter
                     .json(obj)
             })
             .catch(next)
-    })
+    });
 objectivesRouter
 .route('/goal-list/:id')
     .all(requireAuth)
