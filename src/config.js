@@ -3,4 +3,5 @@ module.exports = {
     NODE_ENV: process.env.NODE_ENV || 'development',
     DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres:CheggSpy@localhost/koigoalkeeperapi',
     JWT_SECRET: process.env.JWT_SECRET || 'kingpendata',
+    GOOGLE_SECRET: process.env.GOOGLE_SECRET || 75000
 };

@@ -1,3 +1,5 @@
+require('dotenv').config();
+const {GOOGLE_SECRET} = require('../config');
 const express = require('express');
 const AuthService = require('./auth-service');
 const UsersService = require("../users/users-service");
@@ -14,7 +16,10 @@ const encrypt = (string) => {
     for(let i = 0; i< string.length; i++){
         x = string[i]+x+string[i];
     }
-    return x+7008041+(7007177*7005451*7004237);
+    if(typeof GOOGLE_SECRET === 'string')
+        return x + parseInt(GOOGLE_SECRET);
+    else
+        return x + GOOGLE_SECRET
 };
 authRouter
     .post('/login', jsonBodyParser, (req, res, next) => {
