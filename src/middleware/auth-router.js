@@ -120,7 +120,7 @@ authRouter
                                     paid_account: false,
                                     local_storage: true,
                                     dark_mode: false,
-                                    color_style: 'standard'
+                                    color_style: 'Default'
                                 };
                                 SettingsService.insertSettings(req.app.get('db'), defaultSettings);
                                 res

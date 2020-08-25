@@ -4,12 +4,26 @@ const jsonBodyParser = express.json();
 const xss = require('xss');
 const {requireAuth} = require('../middleware/jwt-auth');
 const SettingsService = require("./settings-service");
-
+const serializeColorStyle = (paid_account, color_style) => {
+    if(!paid_account)
+        return 'Default';
+    return color_style
+};
+const serializeTheme = (paid_account, theme) => {
+    if(!paid_account)
+        return (theme === 'Default' || theme === 'Bekko') ? theme : 'Default';
+    return theme
+};
+const seralizeTypeList = (paid_account, type_list) => {
+    if(!paid_account)
+        return (type_list === 'Normal List' || type_list === 'Short List') ? type_list : 'Normal List';
+    return type_list
+};
 const serializeSettings = settings => ({
     id: settings.id,
     userid: settings.userid,
-    theme: xss(settings.theme),
-    type_list: xss(settings.type_list),
+    theme: xss(serializeTheme(settings.paid_account, settings.theme)),
+    type_list: xss(seralizeTypeList(settings.paid_account, settings.type_list)),
     type_selected: xss(settings.type_selected),
     show_delete: settings.show_delete,
     auto_archiving: settings.auto_archiving,
@@ -17,9 +31,10 @@ const serializeSettings = settings => ({
     local_storage: settings.local_storage,
     notifications: settings.notifications,
     paid_account: settings.paid_account,
-    color_style: settings.color_style,
+    color_style: serializeColorStyle(settings.paid_account, settings.color_style),
     compacted: xss(settings.compacted)
 });
+
 settingsRouter
     .route('/:id')
     .all(requireAuth)
@@ -40,22 +55,24 @@ settingsRouter
         res.json(serializeSettings(res.setting))
     })
     .patch(jsonBodyParser, (req, res, next) => {
-        const {theme, type_selected, color_style} = req.body;
-        const settingUpdate = {theme, type_selected, color_style};
+        const {theme, type_selected, color_style, type_list} = req.body;
+        const settingUpdate = {theme, type_selected, color_style, type_list};
         const numberOfValues = Object.values(settingUpdate).length;
 
         if (numberOfValues === 0)
             return res.status(400).json({
                 error: {
-                    message: `Request body must contain either 'theme', 'type_selected', or 'color_style'`
+                    message: `Request body must contain either 'theme', 'type_selected', 'type_list', or 'color_style'`
                 }
             });
         const newSetting = {
             ...res.setting,
             color_style: settingUpdate.color_style || res.setting.color_style,
             theme: settingUpdate.theme || res.setting.theme,
+            type_list: settingUpdate.type_list || res.setting.type_list,
             type_selected: settingUpdate.type_selected || res.setting.type_selected
         };
+
         SettingsService.updateSettings(req.app.get('db'), req.params.id, serializeSettings(newSetting))
             .then(numRowsAffected => {
                 res.status(204).end()
@@ -100,15 +117,16 @@ settingsRouter
                     message: `Request body must contain an entire settings object.`
                 }
             });
+        let paid_account = res.setting.paid_account;
         const newSetting = {
             ...res.setting,
             show_delete: typeof settingUpdate === 'boolean' ? settingUpdate.show_delete : res.setting.show_delete,
             notifications: typeof settingUpdate === 'boolean' ? settingUpdate.notifications : res.setting.notifications,
             auto_archiving: typeof settingUpdate === 'boolean' ? settingUpdate.auto_archiving : res.setting.auto_archiving,
             dark_mode: typeof settingUpdate === 'boolean' ? settingUpdate.dark_mode : res.setting.dark_mode,
-            type_list: settingUpdate.type_list || res.setting.type_list,
-            color_style: settingUpdate.color_style || res.setting.color_style,
-            theme: settingUpdate.theme || res.setting.theme,
+            type_list: seralizeTypeList(paid_account,settingUpdate.type_list || res.setting.type_list),
+            color_style: serializeColorStyle(paid_account,settingUpdate.color_style || res.setting.color_style),
+            theme: serializeTheme(paid_account, settingUpdate.theme || res.setting.theme),
             type_selected: settingUpdate.type_selected || res.setting.type_selected,
             compacted: settingUpdate.compacted || res.setting.compacted
         };
@@ -337,25 +355,39 @@ settingsRouter
     })
     .get((req, res, next) => {
         let newType = '';
-        switch (res.setting.type_list) {
-            case 'Today List':
-                newType = 'Short List';
-                break;
-            case 'Short List':
-                newType = 'Normal List';
-                break;
-            case 'Normal List':
-                newType = 'Extended List';
-                break;
-            case 'Extended List':
-                newType = 'Full List';
-                break;
-            case 'Full List':
-                newType = 'Today List';
-                break;
-            default:
-                newType = 'Normal List';
-                break;
+        if(!res.setting.paid_account) {
+            switch (res.setting.type_list) {
+                case 'Short List':
+                    newType = 'Normal List';
+                    break;
+                case 'Normal List':
+                    newType = 'Short List';
+                    break;
+                default:
+                    newType = 'Normal List';
+                    break;
+            }
+        } else {
+            switch (res.setting.type_list) {
+                case 'Today List':
+                    newType = 'Short List';
+                    break;
+                case 'Short List':
+                    newType = 'Normal List';
+                    break;
+                case 'Normal List':
+                    newType = 'Extended List';
+                    break;
+                case 'Extended List':
+                    newType = 'Full List';
+                    break;
+                case 'Full List':
+                    newType = 'Today List';
+                    break;
+                default:
+                    newType = 'Normal List';
+                    break;
+            }
         }
         const newSetting = {
             ...res.setting,

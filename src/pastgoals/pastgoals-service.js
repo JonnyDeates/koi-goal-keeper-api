@@ -12,6 +12,12 @@ const PastGoalService = {
             .where('id', id)
             .first()
     },
+    countPastGoals(knex, userid) {
+    return knex('past_goals')
+        .count('userid', {as: 'count'})
+        .where({userid})
+        .then((count) => count);
+    },
     deleteItem(knex, id) {
         return knex('past_goals')
             .where({id})

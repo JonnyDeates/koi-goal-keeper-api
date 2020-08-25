@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const ObjectivesService = require('./objectives-service');
-const { requireAuth } = require('../middleware/jwt-auth');
+const {requireAuth} = require('../middleware/jwt-auth');
 const objectivesRouter = express.Router();
 const jsonBodyParser = express.json();
 
@@ -18,10 +18,9 @@ objectivesRouter
     .route('/')
     .all(requireAuth)
     .post(jsonBodyParser, (req, res, next) => {
-        const { obj, goalid, checked } = req.body;
+        const {obj, goalid, checked} = req.body;
         const newObjective = {checked: typeof checked === "boolean" ? checked : false, obj, goalid};
         let count = 0;
-            ObjectivesService.countObjectives(req.app.get('db')).then(Count=>  count = parseInt(Count[0].count));
         for (const [key, value] of Object.entries(newObjective)) {
             if (value === undefined || null) {
                 return res.status(400).json({
@@ -29,23 +28,17 @@ objectivesRouter
                 });
             }
         }
-
-       if(count > 50){
-           return res.status(402).json({
-               error: `Hit cap on Objectives`
-           });
-       }
-        ObjectivesService.insertObjective(req.app.get('db'), newObjective)
-            .then(obj => {
-                res
-                    .status(201)
-                    .location(path.posix.join(req.originalUrl, `/${obj.id}`))
-                    .json(obj)
-            })
-            .catch(next)
+            ObjectivesService.insertObjective(req.app.get('db'), newObjective)
+                .then(obj => {
+                    res
+                        .status(201)
+                        .location(path.posix.join(req.originalUrl, `/${obj.id}`))
+                        .json(obj)
+                })
+                .catch(next)
     });
 objectivesRouter
-.route('/goal-list/:id')
+    .route('/goal-list/:id')
     .all(requireAuth)
     .get((req, res, next) => {
         ObjectivesService.getGroupedObjectives(req.app.get('db'), req.params.id)
@@ -76,8 +69,8 @@ objectivesRouter
     })
     .patch(jsonBodyParser, (req, res, next) => {
         const {obj, goalid} = req.body;
-        const newObjective = { obj, goalid};
-        newObjective.obj = (!!obj) ? obj :res.obj.checked;
+        const newObjective = {obj, goalid};
+        newObjective.obj = (!!obj) ? obj : res.obj.checked;
         newObjective.goalid = (!!goalid) ? goalid : res.obj.goalid;
 
         for (const [key, value] of Object.entries(newObjective)) {
@@ -88,7 +81,7 @@ objectivesRouter
             }
         }
 
-        ObjectivesService.updateObjective(req.app.get('db'),req.params.id, newObjective)
+        ObjectivesService.updateObjective(req.app.get('db'), req.params.id, newObjective)
             .then(() => {
                 res.status(204).json(res.obj)
             })
