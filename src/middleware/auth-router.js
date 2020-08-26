@@ -123,7 +123,7 @@ authRouter
                                     notifications: true,
                                     compacted: 'No',
                                     paid_account: false,
-                                    local_storage: true,
+                                    local_storage: false,
                                     dark_mode: false,
                                     color_style: 'Default'
                                 };
