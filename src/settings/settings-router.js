@@ -1,21 +1,22 @@
 const express = require('express');
 const settingsRouter = express.Router();
 const jsonBodyParser = express.json();
+const {postCharge} = require('../payment.js');
 const xss = require('xss');
 const {requireAuth} = require('../middleware/jwt-auth');
 const SettingsService = require("./settings-service");
 const serializeColorStyle = (paid_account, color_style) => {
-    if(!paid_account)
+    if (!paid_account)
         return 'Default';
     return color_style
 };
 const serializeTheme = (paid_account, theme) => {
-    if(!paid_account)
+    if (!paid_account)
         return (theme === 'Default' || theme === 'Bekko') ? theme : 'Default';
     return theme
 };
 const seralizeTypeList = (paid_account, type_list) => {
-    if(!paid_account)
+    if (!paid_account)
         return (type_list === 'Normal List' || type_list === 'Short List') ? type_list : 'Normal List';
     return type_list
 };
@@ -124,8 +125,8 @@ settingsRouter
             notifications: typeof settingUpdate === 'boolean' ? settingUpdate.notifications : res.setting.notifications,
             auto_archiving: typeof settingUpdate === 'boolean' ? settingUpdate.auto_archiving : res.setting.auto_archiving,
             dark_mode: typeof settingUpdate === 'boolean' ? settingUpdate.dark_mode : res.setting.dark_mode,
-            type_list: seralizeTypeList(paid_account,settingUpdate.type_list || res.setting.type_list),
-            color_style: serializeColorStyle(paid_account,settingUpdate.color_style || res.setting.color_style),
+            type_list: seralizeTypeList(paid_account, settingUpdate.type_list || res.setting.type_list),
+            color_style: serializeColorStyle(paid_account, settingUpdate.color_style || res.setting.color_style),
             theme: serializeTheme(paid_account, settingUpdate.theme || res.setting.theme),
             type_selected: settingUpdate.type_selected || res.setting.type_selected,
             compacted: settingUpdate.compacted || res.setting.compacted
@@ -327,15 +328,19 @@ settingsRouter
             })
             .catch(next)
     })
-    .get((req, res, next) => {
-        const newSetting = {
-            ...res.setting,
-            paid_account: !res.setting.paid_account,
-        };
-        SettingsService.updateSettings(req.app.get('db'), req.params.id, newSetting)
-            .then(() => {
-                res.status(204).json(res.setting)
-            })
+    .post(jsonBodyParser, (req, res, next) => {
+        postCharge(req, res).then((obj) => {
+            if (!obj.error) {
+                const newSetting = {
+                    ...res.setting,
+                    paid_account: !res.setting.paid_account,
+                };
+                SettingsService.updateSettings(req.app.get('db'), req.params.id, newSetting)
+                    .then(() => {
+                        res.status(204).json({setting: res.setting, ...obj})
+                    })
+            }
+        }).catch(next);
     });
 settingsRouter
     .route('/toggle/type_list/:id')
@@ -355,7 +360,7 @@ settingsRouter
     })
     .get((req, res, next) => {
         let newType = '';
-        if(!res.setting.paid_account) {
+        if (!res.setting.paid_account) {
             switch (res.setting.type_list) {
                 case 'Short List':
                     newType = 'Normal List';
