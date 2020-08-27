@@ -46,6 +46,12 @@ const UsersService = {
             .returning('*')
             .then(([user]) => user);
     },
+    getUserWithUserName(db, username) {
+        return db('users')
+            .where({username})
+            .first()
+            .then(user => user);
+    },
     getAllUsers(db) {
         return db.select('*').from('users')
     },
