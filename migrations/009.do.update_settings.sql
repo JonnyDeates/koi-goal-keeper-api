@@ -4,7 +4,7 @@ ALTER TABLE settings
 
 Alter TABLE settings
     ADD COLUMN
-        local_storage BOOLEAN NOT NULL DEFAULT true;
+        local_storage BOOLEAN NOT NULL DEFAULT false;
 
 Alter TABLE settings
     ADD COLUMN
