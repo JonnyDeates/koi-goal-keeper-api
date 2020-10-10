@@ -64,7 +64,7 @@ usersRouter
                                     local_storage: true,
                                     dark_mode: false,
                                     color_style: 'standard',
-                                    sort_style: 'latest'
+                                    sort_style: 'No'
                                 };
                                 SettingsService.insertSettings(req.app.get('db'), defaultSettings);
                                 res
