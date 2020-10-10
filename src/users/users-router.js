@@ -55,6 +55,7 @@ usersRouter
                                     theme: 'Light Mode',
                                     type_list: 'Normal List',
                                     type_selected: 'All',
+                                    ascending: false,
                                     auto_archiving: false,
                                     show_delete: false,
                                     notifications: true,
@@ -62,7 +63,8 @@ usersRouter
                                     paid_account: false,
                                     local_storage: true,
                                     dark_mode: false,
-                                    color_style: 'standard'
+                                    color_style: 'standard',
+                                    sort_style: 'latest'
                                 };
                                 SettingsService.insertSettings(req.app.get('db'), defaultSettings);
                                 res

@@ -28,6 +28,8 @@ const serializeSettings = settings => ({
     type_selected: xss(settings.type_selected),
     show_delete: settings.show_delete,
     auto_archiving: settings.auto_archiving,
+    ascending: settings.ascending,
+    sort_style: settings.sort_style,
     dark_mode: settings.dark_mode,
     local_storage: settings.local_storage,
     notifications: settings.notifications,
@@ -56,8 +58,8 @@ settingsRouter
         res.json(serializeSettings(res.setting))
     })
     .patch(jsonBodyParser, (req, res, next) => {
-        const {theme, type_selected, color_style, type_list} = req.body;
-        const settingUpdate = {theme, type_selected, color_style, type_list};
+        const {theme, type_selected, color_style, sort_style, type_list} = req.body;
+        const settingUpdate = {theme, type_selected, color_style, sort_style, type_list};
         const numberOfValues = Object.values(settingUpdate).length;
 
         if (numberOfValues === 0)
@@ -71,9 +73,10 @@ settingsRouter
             color_style: settingUpdate.color_style || res.setting.color_style,
             theme: settingUpdate.theme || res.setting.theme,
             type_list: settingUpdate.type_list || res.setting.type_list,
+            sort_style: settingUpdate.sort_style || res.setting.sort_style,
             type_selected: settingUpdate.type_selected || res.setting.type_selected
         };
-
+        console.log(sort_style, newSetting)
         SettingsService.updateSettings(req.app.get('db'), req.params.id, serializeSettings(newSetting))
             .then(numRowsAffected => {
                 res.status(204).end()
@@ -97,7 +100,8 @@ settingsRouter
             .catch(next)
     })
     .patch(jsonBodyParser, (req, res, next) => {
-        const {type_list, theme, type_selected, color_style, show_delete, notifications, auto_archiving, dark_mode, local_storage, compacted} = req.body;
+        const {type_list, theme, type_selected, color_style, show_delete, notifications, auto_archiving, dark_mode,
+            local_storage, compacted, ascending, sort_style} = req.body;
         const settingUpdate = {
             type_list,
             theme,
@@ -106,8 +110,10 @@ settingsRouter
             show_delete,
             notifications,
             auto_archiving,
+            ascending,
             dark_mode,
             local_storage,
+            sort_style,
             compacted
         };
         const numberOfValues = Object.values(settingUpdate).length;
@@ -121,6 +127,7 @@ settingsRouter
         let paid_account = res.setting.paid_account;
         const newSetting = {
             ...res.setting,
+            ascending: typeof settingUpdate === 'boolean' ? settingUpdate.ascending : res.setting.ascending,
             show_delete: typeof settingUpdate === 'boolean' ? settingUpdate.show_delete : res.setting.show_delete,
             notifications: typeof settingUpdate === 'boolean' ? settingUpdate.notifications : res.setting.notifications,
             auto_archiving: typeof settingUpdate === 'boolean' ? settingUpdate.auto_archiving : res.setting.auto_archiving,
@@ -128,6 +135,7 @@ settingsRouter
             type_list: seralizeTypeList(paid_account, settingUpdate.type_list || res.setting.type_list),
             color_style: serializeColorStyle(paid_account, settingUpdate.color_style || res.setting.color_style),
             theme: serializeTheme(paid_account, settingUpdate.theme || res.setting.theme),
+            sort_style: settingUpdate.sort_style || res.setting.sort_style,
             type_selected: settingUpdate.type_selected || res.setting.type_selected,
             compacted: settingUpdate.compacted || res.setting.compacted
         };
@@ -191,6 +199,32 @@ settingsRouter
             })
     });
 settingsRouter
+    .route('/toggle/ascending/:id')
+    .all(requireAuth)
+    .all((req, res, next) => {
+        SettingsService.getById(req.app.get('db'), req.params.id)
+            .then(setting => {
+                if (!setting) {
+                    return res.status(404).json({
+                        error: {message: `Settings doesn't exist`}
+                    })
+                }
+                res.setting = setting;
+                next()
+            })
+            .catch(next)
+    })
+    .get((req, res, next) => {
+        const newSetting = {
+            ...res.setting,
+            ascending: !res.setting.ascending,
+        };
+        SettingsService.updateSettings(req.app.get('db'), req.params.id, newSetting)
+            .then(() => {
+                res.status(204).json(res.setting)
+            })
+    });
+settingsRouter
     .route('/toggle/auto_archiving/:id')
     .all(requireAuth)
     .all((req, res, next) => {
@@ -239,9 +273,6 @@ settingsRouter
                 newCompacted = 'Compacted';
                 break;
             case 'Compacted':
-                newCompacted = 'Extra-Compacted';
-                break;
-            case 'Extra-Compacted':
                 newCompacted = 'Ultra-Compacted';
                 break;
             case 'Ultra-Compacted':
@@ -312,6 +343,7 @@ settingsRouter
                 res.status(204).json(res.setting)
             })
     });
+
 settingsRouter
     .route('/toggle/paid_account/:id')
     .all(requireAuth)
