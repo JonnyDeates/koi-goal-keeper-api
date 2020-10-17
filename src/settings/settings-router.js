@@ -76,7 +76,6 @@ settingsRouter
             sort_style: settingUpdate.sort_style || res.setting.sort_style,
             type_selected: settingUpdate.type_selected || res.setting.type_selected
         };
-        console.log(sort_style, newSetting)
         SettingsService.updateSettings(req.app.get('db'), req.params.id, serializeSettings(newSetting))
             .then(numRowsAffected => {
                 res.status(204).end()
