@@ -52,7 +52,7 @@ usersRouter
                             .then(user => {
                                 const defaultSettings = {
                                     userid: user.id,
-                                    theme: 'Light Mode',
+                                    theme: 'Default',
                                     type_list: 'Normal List',
                                     type_selected: 'All',
                                     ascending: false,
