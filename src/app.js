@@ -44,7 +44,7 @@ app.use('/past/objectives', PastObjectivesRouter);
 app.use('/past/goals', PastGoalsRouter);
 app.use('/auth', authRouter);
 app.use('/settings', settingsRouter);
-app.use(errorHandler);
+// app.use(errorHandler);
 
 function errorHandler(error, req, res, next) {
     const code = error.status || 500;
