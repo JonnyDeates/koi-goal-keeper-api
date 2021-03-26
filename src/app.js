@@ -44,16 +44,16 @@ app.use('/past/objectives', PastObjectivesRouter);
 app.use('/past/goals', PastGoalsRouter);
 app.use('/auth', authRouter);
 app.use('/settings', settingsRouter);
-// app.use(errorHandler);
+app.use(errorHandler);
 
-// function errorHandler(error, req, res, next) {
-//     const code = error.status || 500;
-//     if (NODE_ENV === 'development') {
-//         error.message = code === 500 ? 'internal server error' : error.message;
-//     } else {
-//         console.error(error);
-//     }
-//     res.status(code).json({message: error.message});
-// }
+function errorHandler(error, req, res, next) {
+    const code = error.status || 500;
+    if (NODE_ENV === 'development') {
+        error.message = code === 500 ? 'internal server error' : error.message;
+    } else {
+        console.error(error);
+    }
+    res.status(code).json({message: error.message});
+}
 
 module.exports = app;
