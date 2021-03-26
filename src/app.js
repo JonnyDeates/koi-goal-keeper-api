@@ -22,27 +22,20 @@ app.use(morgan(morganOption));
 const allowedOrigins = ['http://koigoalkeeper.com', 'https://koigoalkeeper.com/login', 'https://koigoalkeeperapi.herokuapp.com','http://localhost:8001',
     'http://www.koigoalkeeper.com', 'https://www.koigoalkeeper.com', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:3000/register'];
 app.use(cors(
-    {
-    origin: function (origin, callback) {
-        // allow requests with no origin - like mobile apps, curl, postman
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = 'The CORS policy for this site does not ' +
-                'allow access from the specified Origin.';
-            return callback(new Error(msg), false);
-        }
-        return callback(null, true);
-    },
-        allowedHeaders: ["Content-Type", "Authorization"]
-}
+//     {
+//     origin: function (origin, callback) {
+//         // allow requests with no origin - like mobile apps, curl, postman
+//         if (!origin) return callback(null, true);
+//         if (allowedOrigins.indexOf(origin) === -1) {
+//             const msg = 'The CORS policy for this site does not ' +
+//                 'allow access from the specified Origin.';
+//             return callback(new Error(msg), false);
+//         }
+//         return callback(null, true);
+//     },
+//         allowedHeaders: ["Content-Type", "Authorization"]
+// }
 ));
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", '*');
-    res.header("Access-Control-Allow-Credentials", true);
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header("Access-Control-Allow-Headers", 'Origin,X-Requested-With,Content-Type,Accept,content-type,application/json');
-    next();
-});
 app.use(helmet());
 app.use('/users', UsersRouter);
 app.use('/goals', GoalsRouter);
