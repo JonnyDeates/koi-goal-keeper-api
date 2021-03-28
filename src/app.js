@@ -48,7 +48,7 @@ app.use(errorHandler);
 
 function errorHandler(error, req, res, next) {
     const code = error.status || 500;
-    if (NODE_ENV === 'development') {
+    if (NODE_ENV === 'production') {
         error.message = code === 500 ? 'internal server error' : error.message;
     } else {
         console.error(error);
