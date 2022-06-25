@@ -31,7 +31,6 @@ const serializeSettings = settings => ({
     ascending: settings.ascending,
     sort_style: settings.sort_style,
     dark_mode: settings.dark_mode,
-    local_storage: settings.local_storage,
     notifications: settings.notifications,
     paid_account: settings.paid_account,
     color_style: serializeColorStyle(settings.paid_account, settings.color_style),
@@ -39,10 +38,10 @@ const serializeSettings = settings => ({
 });
 
 settingsRouter
-    .route('/:id')
+    .route('/')
     .all(requireAuth)
     .all((req, res, next) => {
-        SettingsService.getById(req.app.get('db'), req.params.id)
+        SettingsService.getByUserId(req.app.get('db'), req.user.id)
             .then(setting => {
                 if (!setting) {
                     return res.status(404).json({
@@ -55,7 +54,10 @@ settingsRouter
             .catch(next)
     })
     .get((req, res, next) => {
-        res.json(serializeSettings(res.setting))
+        const sterilizedSettings = serializeSettings(res.setting)
+        delete sterilizedSettings.id;
+        delete sterilizedSettings.userid;
+        res.json({...sterilizedSettings, email: req.user.email, nickname: req.user.nickname})
     })
     .patch(jsonBodyParser, (req, res, next) => {
         const {theme, type_selected, color_style, sort_style, type_list} = req.body;

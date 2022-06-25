@@ -1,4 +1,0 @@
-ALTER TABLE current_goals DROP COLUMN IF EXISTS type;
-ALTER TABLE past_goals DROP COLUMN IF EXISTS type;
-
-DROP TYPE IF EXISTS goal_type;

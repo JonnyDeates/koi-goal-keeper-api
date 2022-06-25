@@ -10,7 +10,7 @@ const SettingsService = {
         return knex
             .from('settings')
             .select('*')
-            .where('userid', userid)
+            .where('user_id', userid)
             .first()
     },
     deleteSettings(knex, id) {
@@ -18,7 +18,7 @@ const SettingsService = {
             .where({id})
             .delete()
     },
-    insertSettings(knex, newSettings) {
+    postSettings(knex, newSettings) {
         return knex
             .insert(newSettings)
             .into('settings')

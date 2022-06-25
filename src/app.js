@@ -19,8 +19,9 @@ const morganOption = (NODE_ENV === 'production')
     : 'common';
 app.use(cacheControl({noCache: true}));
 app.use(morgan(morganOption));
-const allowedOrigins = ['http://koigoalkeeper.com', 'https://koigoalkeeper.com', 'https://koigoalkeeper.com/login', 'https://koigoalkeeper.com/register', 'https://koigoalkeeperapi.herokuapp.com','http://localhost:8001',
-    'http://www.koigoalkeeper.com', 'https://www.koigoalkeeper.com', 'https://www.koigoalkeeper.com/login', 'https://www.koigoalkeeper.com/register'];
+const allowedOrigins = NODE_ENV === 'development' ? ['http://localhost:3000', 'http://localhost:3001'] 
+: ['http://koigoalkeeper.com', 'https://koigoalkeeper.com', 'https://koigoalkeeperapi.herokuapp.com',
+'http://www.koigoalkeeper.com', 'https://www.koigoalkeeper.com'];
 app.use(cors(
     {
     origin: function (origin, callback) {

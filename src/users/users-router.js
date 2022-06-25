@@ -20,20 +20,20 @@ const validateEmail = (email) => {
 usersRouter
     .route('/')
     .post(jsonBodyParser, (req, res, next) => {
-        const {password, username, nickname} = req.body;
+        const {password, email, nickname} = req.body;
 
-        for (const field of ['username', 'password', 'nickname'])
+        for (const field of ['email', 'password', 'nickname'])
             if (!req.body[field])
                 return res.status(400).json({
                     error: `Missing '${field}' in request body`
                 });
-        if(!validateEmail(username))
+        if(!validateEmail(email))
             return res.status(400).json({error: `Email not formatted correctly`});
 
         const passwordError = UsersService.validatePassword(password);
         if (passwordError)
             return res.status(400).json({error: passwordError});
-        UsersService.hasUserWithUserName(req.app.get('db'), username)
+        UsersService.hasUserWithEmail(req.app.get('db'), email)
             .then(hasUserWithUserName => {
                 if (hasUserWithUserName)
                     return res.status(400).json({error: `Email already taken`});
@@ -41,8 +41,9 @@ usersRouter
                 return UsersService.hashPassword(password)
                     .then(hashedPassword => {
                         const newUser = {
-                            username,
+                            email,
                             password: hashedPassword,
+                            paid_account: "No",
                             nickname,
                             date_created: 'now()',
                             date_modified: 'now()',
@@ -51,22 +52,20 @@ usersRouter
                         return UsersService.insertUser(req.app.get('db'), newUser)
                             .then(user => {
                                 const defaultSettings = {
-                                    userid: user.id,
+                                    user_id: user.id,
                                     theme: 'Default',
                                     type_list: 'Normal List',
                                     type_selected: 'All',
-                                    ascending: false,
-                                    auto_archiving: false,
-                                    show_delete: false,
-                                    notifications: true,
-                                    compacted: 'No',
-                                    paid_account: false,
-                                    local_storage: false,
-                                    dark_mode: false,
+                                    ascending: 0,
+                                    auto_archiving: 0,
+                                    show_delete: 0,
+                                    notifications: 1,
+                                    dark_mode: 0,
                                     color_style: 'standard',
-                                    sort_style: 'No'
+                                    sort_style: 'No',
+                                    compacted: 'No'
                                 };
-                                SettingsService.insertSettings(req.app.get('db'), defaultSettings);
+                                SettingsService.postSettings(req.app.get('db'), defaultSettings);
                                 res
                                     .status(201)
                                     .location(path.posix.join(req.originalUrl, `/${user.id}`))

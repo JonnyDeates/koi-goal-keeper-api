@@ -28,14 +28,13 @@ const UsersService = {
         return {
             id: user.id,
             email: xss(user.email),
-            username: xss(user.username),
             nickname: xss(user.nickname),
             date_created: new Date(user.date_created)
         };
     },
-    hasUserWithUserName(db, username) {
+    hasUserWithEmail(db, email) {
         return db('users')
-            .where({username})
+            .where({email})
             .first()
             .then(user => !!user);
     },
@@ -46,9 +45,9 @@ const UsersService = {
             .returning('*')
             .then(([user]) => user);
     },
-    getUserWithUserName(db, username) {
+    getUserWithEmail(db, email) {
         return db('users')
-            .where({username})
+            .where({email})
             .first()
             .then(user => user);
     },

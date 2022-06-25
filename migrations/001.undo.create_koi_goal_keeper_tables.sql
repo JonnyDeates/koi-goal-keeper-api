@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS objectives;
+DROP TABLE IF EXISTS past_objectives;
+DROP TABLE IF EXISTS current_goals;
+DROP TABLE IF EXISTS past_goals;
+DROP TYPE IF EXISTS goal_type;
+DROP TABLE IF EXISTS settings;
+DROP TABLE IF EXISTS users;

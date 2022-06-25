@@ -1,36 +1,39 @@
 const AuthService = require('./auth-service');
-const SettingsService = require("../settings/settings-service");
+const {JWT_SUB} = require('../config');
 
 function requireAuth(req, res, next) {
-    const authToken = req.get('Authorization') || '';
+    let bearerToken = req.get('authorization') || '';
 
-    let bearerToken;
-    if (!authToken.toLowerCase().startsWith('bearer ')) {
+    if (!bearerToken.toLowerCase().startsWith('bearer ')) {
         return res.status(401).json({error: 'Missing bearer token'})
     } else {
-        bearerToken = authToken.slice(7, authToken.length)
+        bearerToken = bearerToken.slice(7, bearerToken.length)
     }
 
     try {
         const payload = AuthService.verifyJwt(bearerToken);
 
-        AuthService.getUserWithUserName(req.app.get('db'), payload.sub,)
-            .then(async user => {
-                if (!user)
-                    return res.status(401).json({error: 'Unauthorized request'});
-                req.user = user;
+        if(payload.sub !== JWT_SUB)
+            return res.status(401).json({error: 'Unauthorized request'})
 
-               await SettingsService.getByUserId(req.app.get('db'), req.user.id)
-                    .then(settings => req.paid_account = settings.paid_account)
-                    .catch(e => req.paid_account = false);
+        AuthService.getUserWithEmail(req.app.get('db'), payload.email)
+            .then(async user => {
+                if (!user && !payload.token_accessed)
+                    return res.status(401).json({error: 'Unauthorized request'});
+
+                const newDate = new Date(payload.token_accessed);
+                newDate.setUTCDate(newDate.getUTCDate() + 7);
+                const expiryDate = new Date();
+
+                if(expiryDate.valueOf() >= newDate.valueOf())
+                    return res.status(401).json({error: 'Unauthorized request, Token Expired'});
+
+                req.user = user;
 
                 next();
                 return null;
             })
-            .catch(err => {
-                console.error(err);
-                next(err)
-            })
+            .catch(err => next(err))
     } catch (error) {
         res.status(401).json({error: 'Unauthorized request'})
     }
